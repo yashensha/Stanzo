@@ -1301,19 +1301,19 @@ export const HighlightingTextarea = React.forwardRef<HTMLTextAreaElement, Highli
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {(() => {
-            const isMalayalamContext = isMalayalam(contextWord) || !!latestRef.current.manglishActive;
-            return (
+          {/* Rhyme lookup is English-only; Malayalam words open the dictionary via double-click instead. */}
+          {!(isMalayalam(contextWord) || latestRef.current.manglishActive) && (
+            <>
               <button
-                className="w-full text-left px-3 py-1.5 text-xs text-terracotta hover:bg-paper-active transition cursor-pointer flex items-center justify-between font-bold"
+                className="w-full text-left px-3 py-1.5 text-xs text-ink hover:bg-paper-active transition cursor-pointer flex items-center justify-between"
                 onClick={handleFindRhymesFromMenu}
               >
-                <span>{isMalayalamContext ? 'Find Malayalam Synonyms' : 'Find Rhymes'}</span>
-                <span className="text-[10px] text-ink-light font-mono">{isMalayalamContext ? 'നിഘണ്ടു' : 'Lookup'}</span>
+                <span>Find Rhymes</span>
+                <span className="text-[10px] text-ink-light font-mono">Lookup</span>
               </button>
-            );
-          })()}
-          <div className="border-t border-paper-darker my-1" style={{ borderColor: 'var(--color-paper-darker)' }} />
+              <div className="border-t border-paper-darker my-1" style={{ borderColor: 'var(--color-paper-darker)' }} />
+            </>
+          )}
           <button
             className="w-full text-left px-3 py-1.5 text-xs text-ink hover:bg-paper-active transition cursor-pointer flex items-center justify-between"
             onClick={handleCut}

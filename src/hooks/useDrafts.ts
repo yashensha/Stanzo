@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { api } from '../utils/apiClient';
+import { collabWsUrl } from '../utils/nativeApiBase';
 
 const parseArray = (val: any): string[] => {
   if (Array.isArray(val)) return val;
@@ -131,8 +132,7 @@ export function useDrafts(session: any) {
       return;
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    const wsUrl = collabWsUrl();
     // Pass JWT token as query parameter
     const roomName = `${draftId}?token=${encodeURIComponent(token)}`;
     

@@ -1,5 +1,7 @@
 import React from 'react';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, User, LogOut } from 'lucide-react';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { Button } from './ui/Button';
 import { useTheme } from '../hooks/useTheme';
 import { Logo } from './Logo';
 
@@ -43,28 +45,47 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
         )}
       </div>
 
-      {/* Right: Theme toggle + User + Sign Out */}
-      <div className="flex items-center gap-3">
-        <button
+      {/* Right: Theme toggle + Profile menu (email, sign out) */}
+      <div className="flex items-center gap-1.5">
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={toggleTheme}
-          className="w-8 h-8 pointer-coarse:w-11 pointer-coarse:h-11 flex items-center justify-center text-ink-muted hover:text-ink hover:bg-paper-active transition rounded-lg cursor-pointer"
+          className="rounded-lg"
           title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
         >
           {resolvedTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-        </button>
-        {userEmail && (
-          <span className="text-[11px] text-ink-muted hidden sm:inline">
-            {userEmail}
-          </span>
-        )}
-        {onSignOut && (
-          <button
-            onClick={onSignOut}
-            className="h-8 pointer-coarse:h-11 px-3 text-xs font-medium text-ink-muted hover:text-ink hover:bg-paper-active transition border border-paper-darker rounded-lg cursor-pointer"
-          >
-            Sign out
-          </button>
+        </Button>
+        {(userEmail || onSignOut) && (
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <Button
+                variant="secondary"
+                size="icon"
+                className="rounded-full font-semibold uppercase"
+                aria-label="Account menu"
+                title="Account"
+              >
+                {userEmail ? userEmail.charAt(0) : <User className="w-4 h-4" />}
+              </Button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content className="radix-menu-content" align="end" sideOffset={6}>
+                {userEmail && (
+                  <DropdownMenu.Label className="px-3 py-2 text-[11px] text-ink-muted max-w-[220px] truncate">
+                    {userEmail}
+                  </DropdownMenu.Label>
+                )}
+                {onSignOut && (
+                  <DropdownMenu.Item className="radix-menu-item is-danger" onSelect={onSignOut}>
+                    <LogOut className="w-4 h-4" />
+                    Sign out
+                  </DropdownMenu.Item>
+                )}
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
         )}
       </div>
     </header>

@@ -3,6 +3,7 @@ import { useWavesurfer } from '@wavesurfer/react';
 import { Play, Pause, Trash2, Loader2, Repeat, Download } from 'lucide-react';
 import { api } from '../utils/apiClient';
 import { cn } from '../utils/cn';
+import { resolveApiUrl } from '../utils/nativeApiBase';
 import { useCssColors, formatDuration } from '../hooks/useCssColors';
 
 interface VoiceMemo {
@@ -52,7 +53,7 @@ export const VoiceMemoCard: React.FC<VoiceMemoCardProps> = ({ memo, label, isPla
 
   const { wavesurfer } = useWavesurfer({
     container: containerRef,
-    url: memo.audio_url,
+    url: resolveApiUrl(memo.audio_url),
     waveColor: colors.wave,
     progressColor: colors.progress,
     height: 40,
@@ -150,7 +151,7 @@ export const VoiceMemoCard: React.FC<VoiceMemoCardProps> = ({ memo, label, isPla
           </span>
         ) : (
           <div className="flex items-center gap-0.5 -mr-1">
-            <a href={memo.audio_url} download={`${label}.wav`} className={iconBtn} title="Download" aria-label={`Download ${label}`}>
+            <a href={resolveApiUrl(memo.audio_url)} download={`${label}.wav`} className={iconBtn} title="Download" aria-label={`Download ${label}`}>
               <Download className="w-3.5 h-3.5" />
             </a>
             <button

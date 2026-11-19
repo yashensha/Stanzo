@@ -22,6 +22,20 @@
       "service": "songwriting-recommender"
     }
   ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "COLLAB_ROOM",
+        "class_name": "CollabRoom"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1-collab-room",
+      "new_sqlite_classes": ["CollabRoom"]
+    }
+  ],
   "vars": {
     "JWT_SECRET": "lyrical_super_secret_jwt_hmac_key_2026_cf_native"
   }

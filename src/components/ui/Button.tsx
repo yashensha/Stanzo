@@ -2,7 +2,7 @@ import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { cn } from '../../utils/cn';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon';
 
 const variants: Record<ButtonVariant, string> = {
   primary: 'bg-terracotta text-paper hover:bg-terracotta-hover',
@@ -12,9 +12,11 @@ const variants: Record<ButtonVariant, string> = {
 };
 
 const sizes: Record<ButtonSize, string> = {
-  sm: 'h-8 px-3 text-xs gap-1.5',
-  md: 'h-10 px-4 text-sm gap-2',
-  lg: 'h-12 px-6 text-base gap-2.5',
+  // Compact by default (mouse/laptop); touch (coarse pointer) gets 44px-class targets.
+  sm: 'h-7 px-2.5 text-xs gap-1.5 pointer-coarse:h-10 pointer-coarse:px-3',
+  md: 'h-8 px-3.5 text-[13px] gap-2 pointer-coarse:h-11 pointer-coarse:px-4 pointer-coarse:text-sm',
+  lg: 'h-10 px-5 text-sm gap-2 pointer-coarse:h-12 pointer-coarse:px-6 pointer-coarse:text-base',
+  icon: 'h-7 w-7 pointer-coarse:h-11 pointer-coarse:w-11 p-0 text-sm',
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

@@ -4,8 +4,13 @@ import { api } from '../utils/apiClient';
 import { Logo, BRAND_NAME } from './Logo';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
+import { isNative } from '../utils/platform';
 
 const GOOGLE_CLIENT_ID = '14287582180-0eanrl7vhg7h6obhogemb18jkqjmtc24.apps.googleusercontent.com';
+// Google blocks its web sign-in inside app WebViews, so the Android/iOS app uses the
+// native account picker instead. It returns an ID token for the same web client ID,
+// which the Worker already verifies.
+const isNativeApp = isNative;
 
 interface LoginProps {
   onLoginSuccess?: (session: any) => void;
@@ -42,6 +47,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (isNativeApp) return;
     const handleCredentialResponse = async (response: any) => {
       if (!response?.credential) return;
       setLoading(true);
@@ -105,6 +111,30 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     }
   }, []);
 
+  const handleNativeGoogleLogin = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { SocialLogin } = await import('@capgo/capacitor-social-login');
+      await SocialLogin.initialize({ google: { webClientId: GOOGLE_CLIENT_ID } });
+      const res = await SocialLogin.login({ provider: 'google', options: {} });
+      const idToken = (res.result as { idToken?: string | null }).idToken;
+      if (!idToken) throw new Error('No ID token returned');
+      const sess = await api.auth.signInWithGoogleCredential(idToken);
+      if (onLoginSuccess) {
+        onLoginSuccess(sess);
+      }
+      if (window.location.pathname !== '/' || !onLoginSuccess) {
+        window.location.href = '/';
+      }
+    } catch (err) {
+      console.error('Native Google login failed:', err);
+      setError('Google sign-in failed: ' + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleGuestLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setLoading(true);
@@ -154,6 +184,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
               <div className="text-sm text-terracotta font-medium animate-pulse" role="status">
                 Signing you in…
               </div>
+            ) : isNativeApp ? (
+              <Button variant="primary" size="lg" onClick={handleNativeGoogleLogin} className="w-full">
+                Continue with Google
+              </Button>
             ) : (
               <div ref={googleBtnContainerRef} className="w-full flex" />
             )}

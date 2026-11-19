@@ -5,6 +5,16 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Youtube from '@tiptap/extension-youtube';
 import { api } from '../utils/apiClient';
+import { resolveApiUrl } from '../utils/nativeApiBase';
+import { mergeAttributes } from '@tiptap/react';
+
+// Stored image links stay relative (`/api/storage/file/...`); only the rendered <img> is
+// pointed at the Worker, so saved content and the deletion logic below are unchanged.
+const ScrapbookImage = Image.extend({
+  renderHTML({ HTMLAttributes }) {
+    return ['img', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { src: resolveApiUrl(HTMLAttributes.src) })];
+  },
+});
 import { Loader2, Bold, Italic, Strikethrough, Heading1, Heading2, List, Quote } from 'lucide-react';
 
 function getImagesFromJSON(node: any): string[] {
@@ -38,7 +48,7 @@ export const ScrapbookPanel: React.FC<ScrapbookPanelProps> = ({ projectId }) => 
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Image.configure({
+      ScrapbookImage.configure({
         inline: false,
         HTMLAttributes: {
           class: 'rounded border border-paper-darker max-w-full my-2 mx-auto block shadow-sm',

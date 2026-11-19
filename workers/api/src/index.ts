@@ -5,7 +5,10 @@ export interface Env {
   JWT_SECRET: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
+  COLLAB_ROOM: DurableObjectNamespace;
 }
+
+export { CollabRoom } from './collabRoom';
 
 // ── JWT Helper using Web Crypto API ──────────────────────────────────────────
 
@@ -143,6 +146,33 @@ export default {
     const path = url.pathname;
     const db = env.songwriting_db;
     const secret = env.JWT_SECRET || 'default_secret';
+
+    // ── Real-time collaboration (y-websocket) ─────────────────────────────────
+    // y-websocket connects to `${serverUrl}/${room}`; the room is `<projectId>?token=<jwt>`
+    // because browsers can't set an Authorization header on a WebSocket.
+    const wsMatch = path.match(/^\/ws\/([0-9a-fA-F-]+)$/);
+    if (wsMatch) {
+      if (request.headers.get('Upgrade') !== 'websocket') {
+        return new Response('Expected websocket', { status: 426 });
+      }
+      const projectId = wsMatch[1];
+      const payload = await verifyJwt(url.searchParams.get('token') || '', secret);
+      if (!payload?.sub) return new Response('Unauthorized', { status: 401 });
+
+      const project: any = await db.prepare("SELECT user_id FROM projects WHERE id = ?").bind(projectId).first();
+      if (!project) return new Response('Project not found', { status: 404 });
+      let hasAccess = project.user_id === payload.sub;
+      if (!hasAccess) {
+        const collab = await db.prepare("SELECT project_id FROM project_collaborators WHERE project_id = ? AND user_id = ?").bind(projectId, payload.sub).first();
+        hasAccess = !!collab;
+      }
+      if (!hasAccess) return new Response('Forbidden', { status: 403 });
+
+      const roomHeaders = new Headers(request.headers);
+      roomHeaders.set('X-Project-Id', projectId);
+      const stub = env.COLLAB_ROOM.get(env.COLLAB_ROOM.idFromName(projectId));
+      return stub.fetch(new Request(request.url, { headers: roomHeaders }));
+    }
 
     try {
       // ── Health Check ────────────────────────────────────────────────────────

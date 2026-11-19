@@ -5,6 +5,7 @@ node_modules/
 
 # Build and Production Artifacts
 dist/
+dist-native/
 data
 dist-ssr/
 *.local
@@ -60,6 +61,16 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Android / Capacitor (android/.gitignore covers Gradle build output and synced web assets)
+*.apk
+*.aab
+*.jks
+*.keystore
+keystore.properties
+android/local.properties
+android/app/google-services.json
+android/app/release/
 
 # Agent and tool workspace caches
 .opencode/

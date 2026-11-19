@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Music } from 'lucide-react';
 import { ActivityBar } from './components/ActivityBar';
 import { Sidebar } from './components/Sidebar';
@@ -94,13 +94,15 @@ function App() {
     });
   }, []);
 
-  const isMalayalamMode = useMemo(() => {
-    return manglishActive || isMalayalam(activeDraft?.content || '') || isMalayalam(activeDraft?.title || '');
-  }, [manglishActive, activeDraft?.content, activeDraft?.title]);
+  // The Malayalam toggle is the single switch: OFF means English lyrics, so the dictionary stays hidden
+  // even if the song happens to contain some Malayalam text.
+  const isMalayalamMode = manglishActive;
 
-  // English tools stay available in every mode; only the Malayalam dictionary is mode-dependent.
+  // Each mode shows only its own tools: English tools in English mode, the dictionary in Malayalam mode.
   useEffect(() => {
-    if (!isMalayalamMode && activeRightPanel === 'malayalam') {
+    if (isMalayalamMode && (activeRightPanel === 'rhyme' || activeRightPanel === 'density' || activeRightPanel === 'swap')) {
+      setActiveRightPanel('malayalam');
+    } else if (!isMalayalamMode && activeRightPanel === 'malayalam') {
       setActiveRightPanel('rhyme');
     }
   }, [isMalayalamMode, activeRightPanel]);
@@ -108,12 +110,15 @@ function App() {
   const handleWordDoubleClicked = async (word: string) => {
     const word_clean = word.trim();
     if (!word_clean) return;
-    
+
+    // The Malayalam dictionary is hidden in English mode, so there is nothing to open for a Malayalam word.
+    if (isMalayalam(word_clean) && !isMalayalamMode) return;
+
     setLookupWord(word_clean);
     setIsRightSidebarOpen(true);
 
-    // Route by the word itself: an English word goes to Rhyme Finder even in a Malayalam song.
-    if (isMalayalam(word_clean)) {
+    // Malayalam mode looks words up in the dictionary; English mode uses Rhyme Finder.
+    if (isMalayalamMode) {
       setActiveRightPanel('malayalam');
       return;
     }
@@ -290,7 +295,6 @@ function App() {
 
       {/* Top Application Header */}
       <HeaderNav
-        title={activeDraft?.title || 'Untitled Song'}
         userEmail={session?.user?.email}
         onSignOut={() => api.auth.signOut()}
         onLogoClick={() => navigate('/')}

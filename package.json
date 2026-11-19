@@ -9,6 +9,8 @@
     "dev:recommender": "wrangler dev --config workers/recommender/wrangler.json",
     "build": "tsc -b && vite build",
     "build:pages": "tsc -b && vite build",
+    "build:native": "tsc -b && vite build --mode capacitor && npx cap sync android",
+    "apk:debug": "npm run build:native && cd android && gradlew.bat assembleDebug",
     "deploy:pages": "npx wrangler pages deploy dist --project-name=songwriting --force",
     "deploy:api": "npx wrangler deploy --config workers/api/wrangler.json",
     "deploy:recommender": "npx wrangler deploy --config workers/recommender/wrangler.json",
@@ -17,6 +19,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
+    "@capgo/capacitor-social-login": "^8.7.11",
     "@hookform/resolvers": "^5.4.0",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-context-menu": "^2.2.16",
@@ -39,6 +44,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "lib0": "^0.2.117",
     "lucide-react": "^1.16.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
@@ -48,11 +54,13 @@
     "wavesurfer.js": "^7.12.7",
     "ws": "^8.21.0",
     "y-codemirror.next": "^0.3.5",
+    "y-protocols": "^1.0.7",
     "y-websocket": "^2.0.4",
     "yjs": "^13.6.30",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.2",
     "@eslint/js": "^10.0.1",
     "@tailwindcss/postcss": "^4.3.0",
     "@types/cors": "^2.8.17",
