@@ -1,4 +1,5 @@
 import { Settings, PanelLeftClose, PanelLeft, Sparkles, Skull } from 'lucide-react';
+import { RailButton } from './ui/RailButton';
 
 interface ActivityBarProps {
   activePanel: 'settings' | 'phrases' | 'graveyard';
@@ -25,52 +26,48 @@ export const ActivityBar: React.FC<ActivityBarProps> = ({
   const navItems = [
     { id: 'phrases' as const, label: 'Phrase Catcher', icon: Sparkles },
     { id: 'graveyard' as const, label: 'Graveyard', icon: Skull },
-    { id: 'settings' as const, label: 'Workspace Settings', icon: Settings },
   ];
 
+  const isSettingsActive = activePanel === 'settings' && isSidebarOpen;
+
   return (
-    <div className="w-14 h-full bg-paper-dark border-r border-paper-darker flex flex-col justify-between items-center py-4 flex-shrink-0 z-10 select-none">
-      <div className="flex flex-col items-center gap-4 w-full">
-        {/* Sidebar Toggle Button */}
-        <button
+    <nav
+      aria-label="Left tools"
+      className="w-14 h-full bg-paper border-r border-paper-darker flex flex-col justify-between items-center py-3 flex-shrink-0 z-10 select-none"
+    >
+      <div className="flex flex-col items-center gap-1.5 w-full">
+        <RailButton
+          label={isSidebarOpen ? 'Collapse left sidebar' : 'Expand left sidebar'}
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className={`w-10 h-10 mb-4 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer ${
-            isSidebarOpen
-              ? 'bg-paper-darker text-terracotta shadow-inner'
-              : 'text-ink-muted hover:text-ink hover:bg-paper-active/50'
-          }`}
-          title={isSidebarOpen ? "Collapse Left Sidebar" : "Expand Left Sidebar"}
-          aria-label="Toggle Left Sidebar"
+          aria-pressed={undefined}
         >
           {isSidebarOpen ? <PanelLeftClose className="w-5 h-5 stroke-[1.5]" /> : <PanelLeft className="w-5 h-5 stroke-[1.5]" />}
-        </button>
+        </RailButton>
 
-        {/* Activity Buttons */}
+        <div className="w-6 h-px bg-paper-darker my-2" aria-hidden="true" />
+
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activePanel === item.id && isSidebarOpen;
           return (
-            <button
+            <RailButton
               key={item.id}
+              label={item.label}
+              active={activePanel === item.id && isSidebarOpen}
               onClick={() => handleItemClick(item.id)}
-              className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer ${
-                isActive
-                  ? 'bg-paper-darker text-terracotta shadow-inner'
-                  : 'text-ink-muted hover:text-ink hover:bg-paper-active/50'
-              }`}
-              title={item.label}
-              aria-label={item.label}
             >
               <Icon className="w-5 h-5 stroke-[1.5]" />
-            </button>
+            </RailButton>
           );
         })}
       </div>
-      
-      {/* Bottom decorative bar */}
-      <div className="text-ink-light text-xs font-mono select-none pointer-events-none">
-        v2.5.0
-      </div>
-    </div>
+
+      <RailButton
+        label="Workspace settings"
+        active={isSettingsActive}
+        onClick={() => handleItemClick('settings')}
+      >
+        <Settings className="w-5 h-5 stroke-[1.5]" />
+      </RailButton>
+    </nav>
   );
 };

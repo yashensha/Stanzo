@@ -3,6 +3,7 @@ import { PenLine, Library, Info } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Notepad } from './Notepad';
 import { ProjectInfoPanel } from './ProjectInfoPanel';
+import { Logo } from './Logo';
 import type { Draft } from '../hooks/useDrafts';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
@@ -83,7 +84,7 @@ export const MobileLayout: React.FC<MobileLayoutProps> = ({
         subconsciousActive ? 'opacity-10 pointer-events-none' : ''
       }`}>
         <div className="flex items-center gap-2">
-          <span className="font-extrabold text-terracotta tracking-wider text-base">Lyrical</span>
+          <Logo size={22} />
         </div>
         {/* Active song title */}
         {activeDraft && (
@@ -122,7 +123,7 @@ export const MobileLayout: React.FC<MobileLayoutProps> = ({
             ) : (
               <div className="flex-1 h-full bg-paper flex flex-col items-center justify-center text-ink-light gap-4 px-8">
                 <div className="text-center">
-                  <span className="text-terracotta font-bold text-lg block mb-1">Lyrical</span>
+                  <Logo size={28} className="mb-2" />
                   <p className="text-sm text-ink-muted mb-6">Your songwriting workspace</p>
                 </div>
                 <button

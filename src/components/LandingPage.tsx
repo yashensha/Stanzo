@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Music, Clock, MoreHorizontal } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Plus, Clock, MoreHorizontal, Search, Feather } from 'lucide-react';
 import * as ContextMenu from '@radix-ui/react-context-menu';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import type { Draft } from '../hooks/useDrafts';
 import { HeaderNav } from './HeaderNav';
+import { Button } from './ui/Button';
+import { Card } from './ui/Card';
+import { Input } from './ui/Input';
 
 interface LandingPageProps {
   drafts: Draft[];
@@ -33,6 +36,10 @@ function wordCount(content: string): number {
   return content.trim().split(/\s+/).filter(Boolean).length;
 }
 
+function firstLine(content: string): string {
+  return content.replace(/^\[.*?\]\n?/gm, '').trim().split('\n')[0] || '';
+}
+
 export const LandingPage: React.FC<LandingPageProps> = ({
   drafts,
   isCloudMode: _isCloudMode,
@@ -48,6 +55,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [renameTitle, setRenameTitle] = useState('');
   const [deletingDraftId, setDeletingDraftId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     if (toastMessage) {
@@ -55,6 +63,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
+
+  const visibleDrafts = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return [...drafts]
+      .sort((a, b) => b.updatedAt - a.updatedAt)
+      .filter((d) => !q || (d.title || '').toLowerCase().includes(q) || d.content.toLowerCase().includes(q));
+  }, [drafts, query]);
 
   const handleStartRename = (draft: Draft) => {
     setRenamingDraftId(draft.id);
@@ -79,144 +94,177 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   return (
     <div className="w-screen h-screen bg-paper flex flex-col overflow-hidden select-none">
-      {/* Top bar */}
       <HeaderNav
         userEmail={userEmail}
         onSignOut={onSignOut}
       />
 
-      {/* Main content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-6 py-12">
+        <div className="max-w-5xl mx-auto px-6 py-10 sm:py-14">
 
-          {/* Hero */}
-          <div className="mb-10">
-            <h1 className="text-3xl font-serif font-bold text-ink mb-2 leading-tight">
-              Your Songs
-            </h1>
-            <p className="text-sm text-ink-muted">
-              Pick up where you left off, or start something new.
-            </p>
+          {/* Title row */}
+          <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+            <div>
+              <h1 className="text-3xl font-serif font-semibold text-ink leading-tight">Your songs</h1>
+              <p className="text-sm text-ink-muted mt-1">
+                {drafts.length === 0
+                  ? 'Start your first song.'
+                  : `${drafts.length} ${drafts.length === 1 ? 'song' : 'songs'}, most recent first.`}
+              </p>
+            </div>
+            <Button id="landing-new-song" size="lg" onClick={onCreateDraft}>
+              <Plus className="w-4 h-4" />
+              New song
+            </Button>
           </div>
 
-          {/* New draft CTA */}
-          <button
-            id="landing-new-song"
-            onClick={onCreateDraft}
-            className="w-full flex items-center gap-3 bg-terracotta hover:bg-terracotta-hover text-white rounded-xl px-5 py-4 mb-8 transition-all duration-150 active:scale-[0.99] shadow-paper-md cursor-pointer group"
-          >
-            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0 group-hover:bg-white/25 transition">
-              <Plus className="w-4 h-4" />
+          {/* Search */}
+          {drafts.length >= 3 && (
+            <div className="relative mb-6 max-w-md">
+              <Search className="w-4 h-4 text-ink-light absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Input
+                type="search"
+                aria-label="Search songs"
+                placeholder="Search titles and lyrics"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="pl-9"
+              />
             </div>
-            <div className="text-left">
-              <div className="text-sm font-bold">New Song</div>
-              <div className="text-[11px] text-white/70">Start with a blank canvas</div>
-            </div>
-          </button>
+          )}
 
-          {/* Drafts grid */}
           {drafts.length === 0 ? (
-            <div className="text-center py-16 text-ink-muted">
-              <Music className="w-10 h-10 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">No songs yet. Create your first one above.</p>
-            </div>
+            <Card className="flex flex-col items-center text-center px-6 py-16">
+              <div className="w-12 h-12 rounded-2xl bg-terracotta-light text-terracotta flex items-center justify-center mb-4">
+                <Feather className="w-6 h-6" />
+              </div>
+              <h2 className="font-serif text-xl text-ink mb-1">A blank page</h2>
+              <p className="text-sm text-ink-muted mb-6 max-w-xs">
+                Write a line, find the rhyme, keep what works. Your songs will gather here.
+              </p>
+              <Button onClick={onCreateDraft}>
+                <Plus className="w-4 h-4" />
+                Write a song
+              </Button>
+            </Card>
+          ) : visibleDrafts.length === 0 ? (
+            <p className="text-sm text-ink-muted py-12 text-center">No songs match "{query}".</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {drafts.map((draft) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {!query && (
+                <button
+                  onClick={onCreateDraft}
+                  className="group min-h-[160px] rounded-2xl border-2 border-dashed border-paper-darker text-ink-muted hover:border-terracotta hover:text-terracotta hover:bg-terracotta-light/60 transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
+                  <span className="text-sm font-medium">New song</span>
+                </button>
+              )}
+
+              {visibleDrafts.map((draft) => (
                 <ContextMenu.Root key={draft.id}>
                   <ContextMenu.Trigger asChild>
-                    <div
+                    <Card
                       id={`landing-draft-${draft.id}`}
+                      interactive
+                      role="button"
+                      tabIndex={0}
                       onClick={() => {
                         if (renamingDraftId !== draft.id) {
                           onSelectDraft(draft.id);
                         }
                       }}
-                      className="group text-left bg-paper border border-paper-darker hover:border-terracotta/30 hover:bg-paper-dark/30 rounded-xl p-5 transition-all duration-200 card-warm cursor-pointer relative flex flex-col justify-between min-h-[130px]"
+                      onKeyDown={(e) => {
+                        if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                          e.preventDefault();
+                          onSelectDraft(draft.id);
+                        }
+                      }}
+                      className="group relative flex flex-col justify-between min-h-[160px] p-5 focus-visible:outline-2 focus-visible:outline-terracotta"
                     >
                       <div>
-                        <div className="flex items-start justify-between gap-4 mb-2.5">
-                          {renamingDraftId === draft.id ? (
-                            <input
-                              type="text"
-                              value={renameTitle}
-                              onChange={(e) => setRenameTitle(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  handleRenameSubmit(draft.id);
-                                } else if (e.key === 'Escape') {
-                                  setRenamingDraftId(null);
-                                }
-                              }}
-                              onClick={(e) => e.stopPropagation()}
-                              className="flex-1 bg-transparent text-sm font-semibold text-ink border-b border-terracotta focus:outline-none py-0.5"
-                              autoFocus
-                              onBlur={() => handleRenameSubmit(draft.id)}
-                            />
-                          ) : (
-                            <h3 className="text-sm font-bold text-ink leading-snug line-clamp-2 group-hover:text-terracotta transition-colors flex-1 pr-6">
-                              {draft.title || 'Untitled Song'}
-                            </h3>
-                          )}
-                          
-                          {/* Three dot dropdown button */}
-                          <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                            <DropdownMenu.Root>
-                              <DropdownMenu.Trigger asChild>
-                                <button
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="w-7 h-7 flex items-center justify-center rounded-md border border-paper-darker bg-paper hover:bg-paper-active text-ink-muted hover:text-ink transition cursor-pointer"
-                                >
-                                  <MoreHorizontal className="w-4 h-4" />
-                                </button>
-                              </DropdownMenu.Trigger>
-                              <DropdownMenu.Portal>
-                                <DropdownMenu.Content
-                                  className="radix-menu-content"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <DropdownMenu.Item
-                                    className="radix-menu-item"
-                                    onSelect={() => handleStartRename(draft)}
-                                  >
-                                    Rename
-                                  </DropdownMenu.Item>
-                                  <DropdownMenu.Item
-                                    className="radix-menu-item text-terracotta hover:bg-terracotta-light"
-                                    onSelect={() => setDeletingDraftId(draft.id)}
-                                  >
-                                    Delete
-                                  </DropdownMenu.Item>
-                                  <DropdownMenu.Item
-                                    className="radix-menu-item"
-                                    onSelect={() => handleShare(draft.id)}
-                                  >
-                                    Share
-                                  </DropdownMenu.Item>
-                                </DropdownMenu.Content>
-                              </DropdownMenu.Portal>
-                            </DropdownMenu.Root>
-                          </div>
-                        </div>
+                        {renamingDraftId === draft.id ? (
+                          <input
+                            type="text"
+                            value={renameTitle}
+                            onChange={(e) => setRenameTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              e.stopPropagation();
+                              if (e.key === 'Enter') {
+                                handleRenameSubmit(draft.id);
+                              } else if (e.key === 'Escape') {
+                                setRenamingDraftId(null);
+                              }
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-full bg-transparent text-base font-semibold text-ink border-b border-terracotta focus:outline-none py-0.5"
+                            autoFocus
+                            aria-label="Song title"
+                            onBlur={() => handleRenameSubmit(draft.id)}
+                          />
+                        ) : (
+                          <h3 className="font-serif text-lg font-semibold text-ink leading-snug line-clamp-2 pr-8 group-hover:text-terracotta transition-colors">
+                            {draft.title || 'Untitled Song'}
+                          </h3>
+                        )}
 
-                        {draft.content && (
-                          <p className="text-[11px] text-ink-muted font-serif italic leading-relaxed line-clamp-2 mb-3 pr-2">
-                            {draft.content.replace(/^\[.*?\]\n?/gm, '').trim().split('\n')[0]}
+                        {firstLine(draft.content) && (
+                          <p className="text-sm text-ink-muted italic leading-relaxed line-clamp-2 mt-2">
+                            {firstLine(draft.content)}
                           </p>
                         )}
                       </div>
 
-                      <div className="flex items-center justify-between text-[10px] text-ink-light font-mono mt-2 pt-2 border-t border-paper-darker/40">
+                      <div className="flex items-center justify-between text-[11px] text-ink-light font-mono mt-4 pt-3 border-t border-paper-darker">
                         <span>{wordCount(draft.content)} words</span>
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           {timeAgo(draft.updatedAt)}
                         </span>
                       </div>
-                    </div>
+
+                      {/* Three dot dropdown button */}
+                      <div className="absolute top-3 right-3 opacity-100 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:group-focus-within:opacity-100 transition-opacity duration-150">
+                        <DropdownMenu.Root>
+                          <DropdownMenu.Trigger asChild>
+                            <button
+                              aria-label="Song actions"
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-8 h-8 flex items-center justify-center rounded-lg text-ink-muted hover:bg-paper-active hover:text-ink transition cursor-pointer"
+                            >
+                              <MoreHorizontal className="w-4 h-4" />
+                            </button>
+                          </DropdownMenu.Trigger>
+                          <DropdownMenu.Portal>
+                            <DropdownMenu.Content
+                              className="radix-menu-content"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <DropdownMenu.Item
+                                className="radix-menu-item"
+                                onSelect={() => handleStartRename(draft)}
+                              >
+                                Rename
+                              </DropdownMenu.Item>
+                              <DropdownMenu.Item
+                                className="radix-menu-item"
+                                onSelect={() => handleShare(draft.id)}
+                              >
+                                Share
+                              </DropdownMenu.Item>
+                              <DropdownMenu.Item
+                                className="radix-menu-item is-danger"
+                                onSelect={() => setDeletingDraftId(draft.id)}
+                              >
+                                Delete
+                              </DropdownMenu.Item>
+                            </DropdownMenu.Content>
+                          </DropdownMenu.Portal>
+                        </DropdownMenu.Root>
+                      </div>
+                    </Card>
                   </ContextMenu.Trigger>
-                  
-                  {/* Context menu overlay */}
+
                   <ContextMenu.Portal>
                     <ContextMenu.Content className="radix-menu-content">
                       <ContextMenu.Item
@@ -226,16 +274,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         Rename
                       </ContextMenu.Item>
                       <ContextMenu.Item
-                        className="radix-menu-item text-terracotta hover:bg-terracotta-light"
-                        onSelect={() => setDeletingDraftId(draft.id)}
-                      >
-                        Delete
-                      </ContextMenu.Item>
-                      <ContextMenu.Item
                         className="radix-menu-item"
                         onSelect={() => handleShare(draft.id)}
                       >
                         Share
+                      </ContextMenu.Item>
+                      <ContextMenu.Item
+                        className="radix-menu-item is-danger"
+                        onSelect={() => setDeletingDraftId(draft.id)}
+                      >
+                        Delete
                       </ContextMenu.Item>
                     </ContextMenu.Content>
                   </ContextMenu.Portal>
@@ -251,28 +299,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <AlertDialog.Portal>
           <AlertDialog.Overlay className="radix-overlay" />
           <AlertDialog.Content className="radix-dialog-content">
-            <AlertDialog.Title className="text-sm font-bold text-ink mb-2">Delete Song</AlertDialog.Title>
-            <AlertDialog.Description className="text-xs text-ink-muted mb-5">
-              Are you sure you want to delete this song? This action cannot be undone and will remove it permanently.
+            <AlertDialog.Title className="text-base font-semibold text-ink mb-2">Delete song?</AlertDialog.Title>
+            <AlertDialog.Description className="text-sm text-ink-muted mb-6">
+              This removes the song permanently and cannot be undone.
             </AlertDialog.Description>
             <div className="flex justify-end gap-2">
               <AlertDialog.Cancel asChild>
-                <button className="px-3.5 py-1.5 border border-paper-darker rounded-md text-xs font-semibold text-ink-muted hover:bg-paper-active transition cursor-pointer">
-                  Cancel
-                </button>
+                <Button variant="secondary" size="sm">Cancel</Button>
               </AlertDialog.Cancel>
               <AlertDialog.Action asChild>
-                <button
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={() => {
                     if (deletingDraftId) {
                       onDeleteDraft(deletingDraftId);
                       setDeletingDraftId(null);
                     }
                   }}
-                  className="px-3.5 py-1.5 bg-terracotta hover:bg-terracotta-hover text-white rounded-md text-xs font-semibold transition cursor-pointer"
                 >
                   Delete
-                </button>
+                </Button>
               </AlertDialog.Action>
             </div>
           </AlertDialog.Content>
@@ -281,7 +328,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 bg-ink text-paper border border-paper-darker shadow-paper-md rounded-lg px-4 py-3 flex items-center gap-2.5 z-50 text-xs font-medium animate-[radix-slide-up_150ms_ease-out]">
+        <div role="status" className="fixed bottom-6 right-6 bg-ink text-paper shadow-paper-md rounded-xl px-4 py-3 flex items-center gap-2.5 z-50 text-sm font-medium animate-[radix-slide-up_150ms_ease-out]">
           <div className="w-1.5 h-1.5 rounded-full bg-terracotta"></div>
           <span>{toastMessage}</span>
         </div>

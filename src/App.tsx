@@ -205,7 +205,7 @@ function App() {
       <div className="w-screen h-screen bg-paper flex items-center justify-center">
         <div className="text-terracotta flex items-center gap-2">
           <Music className="w-5 h-5 animate-spin" />
-          <span className="font-serif font-bold text-sm tracking-wide">Loading Lyrical...</span>
+          <span className="font-serif font-bold text-sm tracking-wide">Loading Stanza…</span>
         </div>
       </div>
     );

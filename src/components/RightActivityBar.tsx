@@ -1,13 +1,30 @@
 import React from 'react';
-import { Info, PanelLeftClose, PanelLeft, BookOpen, Mic, Search, Activity, Shuffle, Languages } from 'lucide-react';
+import { Info, PanelLeftClose, PanelLeft, BookOpen, Mic, Search, Activity, Shuffle, Languages, type LucideIcon } from 'lucide-react';
+import { RailButton } from './ui/RailButton';
+
+type RightPanelId = 'info' | 'scrapbook' | 'audio' | 'rhyme' | 'density' | 'swap' | 'malayalam';
 
 interface RightActivityBarProps {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
-  activePanel: 'info' | 'scrapbook' | 'audio' | 'rhyme' | 'density' | 'swap' | 'malayalam';
-  setActivePanel: (panel: 'info' | 'scrapbook' | 'audio' | 'rhyme' | 'density' | 'swap' | 'malayalam') => void;
+  activePanel: RightPanelId;
+  setActivePanel: (panel: RightPanelId) => void;
   isMalayalamMode?: boolean;
 }
+
+interface RailItem {
+  id: RightPanelId;
+  label: string;
+  title?: string;
+  icon: LucideIcon;
+}
+
+const MALAYALAM: RailItem = {
+  id: 'malayalam',
+  label: 'Malayalam Dictionary & Meter',
+  title: 'മലയാളം നിഘണ്ടു & മീറ്റർ (Malayalam Dictionary & Meter)',
+  icon: Languages,
+};
 
 export const RightActivityBar: React.FC<RightActivityBarProps> = ({
   isSidebarOpen,
@@ -16,7 +33,7 @@ export const RightActivityBar: React.FC<RightActivityBarProps> = ({
   setActivePanel,
   isMalayalamMode = false,
 }) => {
-  const handleItemClick = (panel: 'info' | 'scrapbook' | 'audio' | 'rhyme' | 'density' | 'swap' | 'malayalam') => {
+  const handleItemClick = (panel: RightPanelId) => {
     if (activePanel === panel && isSidebarOpen) {
       setIsSidebarOpen(false);
     } else {
@@ -25,146 +42,69 @@ export const RightActivityBar: React.FC<RightActivityBarProps> = ({
     }
   };
 
+  // Song tools: Malayalam sits next to Info in Malayalam mode
+  const songItems: RailItem[] = [
+    { id: 'info', label: 'Project Info', icon: Info },
+    ...(isMalayalamMode ? [MALAYALAM] : []),
+    { id: 'scrapbook', label: 'Scrapbook', icon: BookOpen },
+    { id: 'audio', label: 'Voice Memos', icon: Mic },
+  ];
+
+  // English-only writing tools: hidden in Malayalam mode
+  const writingItems: RailItem[] = isMalayalamMode
+    ? []
+    : [
+        { id: 'rhyme', label: 'Rhyme Finder', icon: Search },
+        { id: 'density', label: 'Rhyme Density Scorer', icon: Activity },
+        { id: 'swap', label: 'Phonetic Word Swap', icon: Shuffle },
+        MALAYALAM,
+      ];
+
+  const renderItem = (item: RailItem) => {
+    const Icon = item.icon;
+    return (
+      <RailButton
+        key={item.id}
+        side="right"
+        label={item.label}
+        title={item.title}
+        active={isSidebarOpen && activePanel === item.id}
+        onClick={() => handleItemClick(item.id)}
+      >
+        <Icon className="w-5 h-5 stroke-[1.5]" />
+      </RailButton>
+    );
+  };
+
   return (
-    <div className="w-14 h-full bg-paper-dark border-l border-paper-darker flex flex-col justify-between items-center py-4 flex-shrink-0 z-10 select-none">
-      <div className="flex flex-col items-center gap-4 w-full">
-        {/* Sidebar Toggle Button (Mirrored PanelLeftClose/PanelLeft for Right side) */}
-        <button
+    <nav
+      aria-label="Song tools"
+      className="w-14 h-full bg-paper border-l border-paper-darker flex flex-col items-center py-3 flex-shrink-0 z-10 select-none"
+    >
+      <div className="flex flex-col items-center gap-1.5 w-full">
+        <RailButton
+          side="right"
+          label={isSidebarOpen ? 'Collapse right sidebar' : 'Expand right sidebar'}
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className={`w-10 h-10 mb-4 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer ${
-            isSidebarOpen
-              ? 'bg-paper-darker text-terracotta shadow-inner'
-              : 'text-ink-muted hover:text-ink hover:bg-paper-active/50'
-          }`}
-          title={isSidebarOpen ? "Collapse Right Sidebar" : "Expand Right Sidebar"}
-          aria-label="Toggle Right Sidebar"
+          aria-pressed={undefined}
         >
-          {/* Using same icons but they mirror/represent right sidebar actions */}
           {isSidebarOpen ? (
             <PanelLeftClose className="w-5 h-5 stroke-[1.5] rotate-180" />
           ) : (
             <PanelLeft className="w-5 h-5 stroke-[1.5] rotate-180" />
           )}
-        </button>
+        </RailButton>
 
-        {/* Activity Buttons */}
-        <button
-          onClick={() => handleItemClick('info')}
-          className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer ${
-            isSidebarOpen && activePanel === 'info'
-              ? 'bg-paper-darker text-terracotta shadow-inner'
-              : 'text-ink-muted hover:text-ink hover:bg-paper-active/50'
-          }`}
-          title="Project Info"
-          aria-label="Project Info"
-        >
-          <Info className="w-5 h-5 stroke-[1.5]" />
-        </button>
+        <div className="w-6 h-px bg-paper-darker my-2" aria-hidden="true" />
+        {songItems.map(renderItem)}
 
-        {/* In Malayalam Mode, put Malayalam Dictionary prominently next to Info */}
-        {isMalayalamMode && (
-          <button
-            onClick={() => handleItemClick('malayalam')}
-            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer ${
-              isSidebarOpen && activePanel === 'malayalam'
-                ? 'bg-paper-darker text-terracotta shadow-inner'
-                : 'text-ink-muted hover:text-ink hover:bg-paper-active/50'
-            }`}
-            title="മലയാളം നിഘണ്ടു & മീറ്റർ (Malayalam Dictionary & Meter)"
-            aria-label="Malayalam Dictionary & Meter"
-          >
-            <Languages className="w-5 h-5 stroke-[1.5]" />
-          </button>
-        )}
-
-        <button
-          onClick={() => handleItemClick('scrapbook')}
-          className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer ${
-            isSidebarOpen && activePanel === 'scrapbook'
-              ? 'bg-paper-darker text-terracotta shadow-inner'
-              : 'text-ink-muted hover:text-ink hover:bg-paper-active/50'
-          }`}
-          title="Scrapbook"
-          aria-label="Scrapbook"
-        >
-          <BookOpen className="w-5 h-5 stroke-[1.5]" />
-        </button>
-
-        <button
-          onClick={() => handleItemClick('audio')}
-          className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer ${
-            isSidebarOpen && activePanel === 'audio'
-              ? 'bg-paper-darker text-terracotta shadow-inner'
-              : 'text-ink-muted hover:text-ink hover:bg-paper-active/50'
-          }`}
-          title="Voice Memos"
-          aria-label="Voice Memos"
-        >
-          <Mic className="w-5 h-5 stroke-[1.5]" />
-        </button>
-
-        {/* English-only tools: hidden in Malayalam mode */}
-        {!isMalayalamMode && (
+        {writingItems.length > 0 && (
           <>
-            <button
-              onClick={() => handleItemClick('rhyme')}
-              className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer ${
-                isSidebarOpen && activePanel === 'rhyme'
-                  ? 'bg-paper-darker text-terracotta shadow-inner'
-                  : 'text-ink-muted hover:text-ink hover:bg-paper-active/50'
-              }`}
-              title="Rhyme Finder"
-              aria-label="Rhyme Finder"
-            >
-              <Search className="w-5 h-5 stroke-[1.5]" />
-            </button>
-
-            <button
-              onClick={() => handleItemClick('density')}
-              className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer ${
-                isSidebarOpen && activePanel === 'density'
-                  ? 'bg-paper-darker text-terracotta shadow-inner'
-                  : 'text-ink-muted hover:text-ink hover:bg-paper-active/50'
-              }`}
-              title="Rhyme Density Scorer"
-              aria-label="Rhyme Density Scorer"
-            >
-              <Activity className="w-5 h-5 stroke-[1.5]" />
-            </button>
-
-            <button
-              onClick={() => handleItemClick('swap')}
-              className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer ${
-                isSidebarOpen && activePanel === 'swap'
-                  ? 'bg-paper-darker text-terracotta shadow-inner'
-                  : 'text-ink-muted hover:text-ink hover:bg-paper-active/50'
-              }`}
-              title="Phonetic Word Swap"
-              aria-label="Phonetic Word Swap"
-            >
-              <Shuffle className="w-5 h-5 stroke-[1.5]" />
-            </button>
-
-            <button
-              onClick={() => handleItemClick('malayalam')}
-              className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer ${
-                isSidebarOpen && activePanel === 'malayalam'
-                  ? 'bg-paper-darker text-terracotta shadow-inner'
-                  : 'text-ink-muted hover:text-ink hover:bg-paper-active/50'
-              }`}
-              title="മലയാളം നിഘണ്ടു & മീറ്റർ (Malayalam Dictionary & Meter)"
-              aria-label="Malayalam Dictionary & Meter"
-            >
-              <Languages className="w-5 h-5 stroke-[1.5]" />
-            </button>
+            <div className="w-6 h-px bg-paper-darker my-2" aria-hidden="true" />
+            {writingItems.map(renderItem)}
           </>
         )}
       </div>
-
-      {/* Bottom version string placeholder to match Left ActivityBar */}
-      <div className="text-ink-light text-xs font-mono select-none pointer-events-none opacity-0">
-        v2.5.0
-      </div>
-    </div>
+    </nav>
   );
 };

@@ -2,6 +2,8 @@ import React from 'react';
 import { FileDown, FileUp, ChevronLeft } from 'lucide-react';
 import { PhraseCatcher } from './PhraseCatcher';
 import { Graveyard } from './Graveyard';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
 
 interface SidebarProps {
   activePanel: 'settings' | 'phrases' | 'graveyard';
@@ -70,17 +72,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className={`${isMobile ? 'w-full' : 'w-64'} h-full bg-paper-dark/70 border-r border-paper-darker flex flex-col flex-shrink-0 z-10`}>
+    <div className={`${isMobile ? 'w-full' : 'w-72'} h-full bg-paper-dark border-r border-paper-darker flex flex-col flex-shrink-0 z-10`}>
       {/* Sidebar Header */}
       <div className="h-14 px-4 border-b border-paper-darker flex items-center justify-between select-none">
-        <span className="font-semibold tracking-wide text-ink text-sm uppercase">
+        <h2 className="font-serif font-semibold text-ink text-lg">
           {getHeaderLabel()}
-        </span>
+        </h2>
         {!isMobile && (
           <button
             onClick={() => setIsSidebarOpen(false)}
-            className="text-ink-muted hover:text-ink hover:bg-paper-darker p-1 rounded cursor-pointer"
-            title="Collapse Panel"
+            className="w-8 h-8 flex items-center justify-center text-ink-muted hover:text-ink hover:bg-paper-active rounded-lg cursor-pointer transition-colors"
+            title="Collapse panel"
+            aria-label="Collapse panel"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -98,20 +101,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   Configure your display name for real-time collaboration. Defaults to your Google account name.
                 </p>
                 <div className="flex flex-col gap-2">
-                  <input
+                  <Input
                     type="text"
+                    aria-label="Pen name"
                     placeholder={googleDefaultName || 'Enter your pen name...'}
                     value={localPenName}
                     onChange={(e) => setLocalPenName(e.target.value)}
                     spellCheck="false"
-                    className="w-full bg-paper border border-paper-darker rounded px-3 py-1.5 text-xs text-ink placeholder-ink-light focus:outline-none focus:border-terracotta transition select-text"
+                    className="select-text h-8 text-xs"
                   />
-                  <button
-                    onClick={() => setPenName(localPenName)}
-                    className="w-full self-end px-4 py-1.5 bg-terracotta hover:bg-terracotta-hover text-white rounded text-xs font-bold transition cursor-pointer"
-                  >
+                  <Button size="sm" onClick={() => setPenName(localPenName)} className="w-full">
                     Save
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -123,14 +124,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </p>
               
               <div className="space-y-2">
-                <button
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={exportAllDrafts}
-                  className="w-full flex items-center justify-center gap-2 bg-paper border border-paper-darker hover:bg-paper-darker text-ink text-xs py-2 rounded-md transition cursor-pointer shadow-paper-sm focus-visible:ring-2 focus-visible:ring-terracotta focus:outline-none"
+                  className="w-full"
                   aria-label="Backup all drafts library to JSON"
                 >
                   <FileDown className="w-3.5 h-3.5" />
-                  Backup Library (JSON)
-                </button>
+                  Back up library (JSON)
+                </Button>
 
                 <label
                   tabIndex={0}
@@ -141,11 +144,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       if (fileInput) fileInput.click();
                     }
                   }}
-                  className="w-full flex items-center justify-center gap-2 bg-paper border border-paper-darker hover:bg-paper-darker text-ink text-xs py-2 rounded-md transition cursor-pointer shadow-paper-sm focus-visible:ring-2 focus-visible:ring-terracotta focus:outline-none"
+                  className="w-full h-8 flex items-center justify-center gap-1.5 bg-paper-dark border border-paper-darker hover:bg-paper-active text-ink text-xs font-medium rounded-xl transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-terracotta"
                   aria-label="Restore library from JSON backup"
                 >
                   <FileUp className="w-3.5 h-3.5" />
-                  Restore Library
+                  Restore library
                   <input
                     id="restore-file-input"
                     type="file"
@@ -158,9 +161,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <div className="border-t border-paper-darker pt-4">
-              <h4 className="text-xs font-semibold text-ink uppercase tracking-wider mb-2">About Lyrical</h4>
+              <h4 className="text-xs font-semibold text-ink uppercase tracking-wider mb-2">About Stanza</h4>
               <p className="text-[11px] text-ink-muted leading-relaxed">
-                Lyrical is designed around the pop math principles of Swedish hitmakers and emotional lyric design.
+                Stanza is designed around the pop math principles of Swedish hitmakers and emotional lyric design.
               </p>
             </div>
           </div>

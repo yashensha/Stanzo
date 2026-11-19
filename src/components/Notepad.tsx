@@ -309,9 +309,10 @@ export const Notepad: React.FC<NotepadProps> = ({
               onChange={(e) => updateActiveDraft({ title: e.target.value })}
               onFocus={() => setIsEditorFocused(true)}
               onBlur={() => setIsEditorFocused(false)}
-              placeholder="Enter Destination Title (e.g., ...Baby One More Time)"
+              placeholder="Song title"
+              aria-label="Song title"
               spellCheck="false"
-              className="flex-1 bg-transparent text-sm font-bold text-ink placeholder-ink-light/70 focus:outline-none py-0.5 border-b border-transparent focus:border-terracotta transition"
+              className="flex-1 bg-transparent font-serif text-xl font-semibold text-ink placeholder-ink-light focus:outline-none py-0.5 border-b-2 border-transparent focus:border-terracotta transition-colors"
               disabled={subconsciousActive}
             />
           </div>
@@ -325,7 +326,7 @@ export const Notepad: React.FC<NotepadProps> = ({
               onClick={handleShare}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold border transition cursor-pointer select-none ${
                 copied
-                  ? 'bg-[#10B981] border-[#10B981] text-white hover:bg-[#059669]'
+                  ? 'bg-terracotta border-terracotta text-white hover:bg-terracotta-hover'
                   : 'border-paper-darker text-ink-muted hover:border-terracotta/40 hover:text-terracotta bg-paper-dark'
               }`}
               title="Copy shareable link to clipboard"
@@ -406,14 +407,15 @@ export const Notepad: React.FC<NotepadProps> = ({
 
       {/* Completion Success Banner */}
       {showSuccessBanner && (
-        <div className="bg-[#ECFDF5] text-emerald-800 border-b border-[#A7F3D0] px-8 py-2.5 flex items-center justify-between text-xs font-medium flex-shrink-0">
+        <div role="status" className="bg-terracotta-light text-ink border-b border-paper-darker px-8 py-2.5 flex items-center justify-between text-xs font-medium flex-shrink-0">
           <div className="flex items-center gap-2">
-            <span className="text-emerald-500 font-bold">✓</span>
+            <Check className="w-4 h-4 text-terracotta" />
             <span>Subconscious session complete! Your raw lyrics are revealed.</span>
           </div>
           <button
             onClick={() => setShowSuccessBanner(false)}
-            className="text-emerald-500 hover:text-emerald-700 transition p-0.5 cursor-pointer"
+            aria-label="Dismiss"
+            className="text-ink-muted hover:text-ink transition p-0.5 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>

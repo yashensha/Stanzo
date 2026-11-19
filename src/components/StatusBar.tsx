@@ -43,16 +43,16 @@ export const StatusBar: React.FC<StatusBarProps> = ({
   }, [content]);
 
   return (
-    <div className="h-6 w-full bg-paper-dark border-t border-paper-darker flex items-center justify-between px-4 text-[10px] text-ink-muted font-mono select-none z-10 flex-shrink-0">
+    <div className="h-7 w-full bg-paper border-t border-paper-darker flex items-center justify-between px-4 text-[11px] text-ink-muted select-none z-10 flex-shrink-0">
       {/* Left section: Active draft name */}
-      <div className="flex items-center gap-2 truncate pr-4">
-        <span className="font-semibold text-ink truncate max-w-[150px]" title={draftTitle}>
+      <div className="flex items-center gap-2.5 truncate pr-4">
+        <span className="font-medium text-ink truncate max-w-[180px]" title={draftTitle}>
           {draftTitle || 'Untitled'}
         </span>
-        <span className="text-ink-light">|</span>
-        
+        <span className="w-1 h-1 rounded-full bg-ink-light" aria-hidden="true" />
+
         {/* Autosave Status */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" role="status">
           {isLoading ? (
             <>
               <Loader2 className="w-3 h-3 animate-spin text-terracotta" />
@@ -65,8 +65,8 @@ export const StatusBar: React.FC<StatusBarProps> = ({
             </>
           ) : (
             <>
-              <Check className="w-3 h-3 text-emerald-600" />
-              <span className="text-emerald-700 font-medium">
+              <Check className="w-3 h-3 text-terracotta" />
+              <span>
                 {isCloudMode ? 'Saved to cloud' : 'Saved to browser'}
               </span>
             </>
@@ -76,25 +76,25 @@ export const StatusBar: React.FC<StatusBarProps> = ({
 
       {/* Right section: Counters and connection */}
       <div className="flex items-center gap-4 flex-shrink-0">
-        <div className="flex gap-3">
-          <span>{stats.lines} Lines</span>
-          <span>{stats.words} Words</span>
-          <span>{stats.chars} Chars</span>
+        <div className="flex gap-3 font-mono tabular-nums">
+          <span>{stats.lines} lines</span>
+          <span>{stats.words} words</span>
+          <span>{stats.chars} chars</span>
         </div>
-        
-        <span className="text-ink-light">|</span>
+
+        <span className="w-1 h-1 rounded-full bg-ink-light" aria-hidden="true" />
 
         {/* Network Status */}
         <div className="flex items-center gap-1" title={isOnline ? 'Cloud database online' : 'Offline - local storage mode'}>
           {isOnline ? (
             <>
-              <Cloud className="w-3 h-3 text-emerald-600" />
-              <span className="text-emerald-700">Online</span>
+              <Cloud className="w-3 h-3 text-terracotta" />
+              <span>Online</span>
             </>
           ) : (
             <>
-              <CloudOff className="w-3 h-3 text-rose-500 animate-pulse" />
-              <span className="text-rose-500 font-semibold">Offline</span>
+              <CloudOff className="w-3 h-3 text-red-600 dark:text-red-400 animate-pulse" />
+              <span className="text-red-600 dark:text-red-400 font-semibold">Offline</span>
             </>
           )}
         </div>

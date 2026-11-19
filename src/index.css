@@ -2,30 +2,33 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
+/* dark: utilities follow the app's .dark class (useTheme), not only the OS setting */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ═══════════════════════════════════════════════════════════════════════════
    Theme: CSS Custom Properties (Light + Dark)
    ═══════════════════════════════════════════════════════════════════════════ */
 
 :root {
   /* Paper / Background */
-  --color-paper: #FAF8F5;
-  --color-paper-dark: #F2EFE9;
-  --color-paper-darker: #E4DDD4;
-  --color-paper-active: #EDE8E1;
+  --color-paper: #FBFAF8;
+  --color-paper-dark: #F3F2EE;
+  --color-paper-darker: #E6E4DE;
+  --color-paper-active: #ECEAE4;
 
   /* Ink / Text */
-  --color-ink: #2C2A29;
-  --color-ink-muted: #7A736A;
-  --color-ink-light: #B0A89E;
+  --color-ink: #26262B;
+  --color-ink-muted: #6E6E78;
+  --color-ink-light: #A9A9B3;
 
-  /* Accent: Terracotta */
-  --color-terracotta: #ed2a15;
-  --color-terracotta-hover: #c81f0d;
-  --color-terracotta-light: #FDF0EC;
+  /* Accent (Stanza "inkwell" indigo). Token names kept for compatibility */
+  --color-terracotta: #0F766E;
+  --color-terracotta-hover: #0B5F59;
+  --color-terracotta-light: #E4F3F1;
 
-  /* Accent: Amber */
-  --color-amber: #ff7364;
-  --color-amber-light: #FEF6E4;
+  /* Accent: secondary highlight */
+  --color-amber: #14917F;
+  --color-amber-light: #EAF6F4;
 
   /* Scrollbar */
   --color-scrollbar: #C9C1B8;
@@ -45,23 +48,23 @@
 .dark {
   /* Paper / Background — OLED Black */
   --color-paper: #000000;
-  --color-paper-dark: #0D0D0D;
-  --color-paper-darker: #1A1A1A;
-  --color-paper-active: #1F1F1F;
+  --color-paper-dark: #0B0B0C;
+  --color-paper-darker: #1C1C1E;
+  --color-paper-active: #232326;
 
   /* Ink / Text */
-  --color-ink: #E8E4DF;
-  --color-ink-muted: #8A8580;
-  --color-ink-light: #4A4540;
+  --color-ink: #F2F2F5;
+  --color-ink-muted: #98989F;
+  --color-ink-light: #5C5C63;
 
-  /* Accent: Terracotta (brighter for WCAG contrast on black) */
-  --color-terracotta: #FF4632;
-  --color-terracotta-hover: #ed2a15;
-  --color-terracotta-light: #1A0F0B;
+  /* Accent (lighter teal for WCAG contrast on OLED black) */
+  --color-terracotta: #2DD4BF;
+  --color-terracotta-hover: #5EEAD4;
+  --color-terracotta-light: #0A1F1D;
 
-  /* Accent: Amber */
-  --color-amber: #FF4632;
-  --color-amber-light: #1A150A;
+  /* Accent: secondary highlight */
+  --color-amber: #2DD4BF;
+  --color-amber-light: #0A1A18;
 
   /* Scrollbar */
   --color-scrollbar: #2A2725;
@@ -223,7 +226,8 @@ textarea::selection {
 
 /* Base style utilities for Popovers, Dropdowns, and Dialogs */
 .radix-menu-content {
-  @apply bg-paper border border-paper-darker rounded-md shadow-paper-md p-1 min-w-[200px] z-50;
+  @apply bg-paper border border-paper-darker rounded-xl shadow-paper-md p-1 min-w-[200px] z-50;
+  @apply dark:bg-paper-darker dark:border-ink-light/40;
   @apply focus:outline-none;
   /* Smooth exit/entrance animations using Tailwind v4 state variants */
   @apply data-[state=open]:animate-[radix-fade-in_150ms_ease-out] data-[state=closed]:animate-[radix-fade-out_100ms_ease-in];
@@ -233,6 +237,19 @@ textarea::selection {
   @apply flex items-center justify-between px-2.5 py-1.5 text-sm text-ink rounded-sm cursor-pointer select-none outline-none;
   @apply data-[highlighted]:bg-paper-active data-[highlighted]:text-ink;
   @apply data-[disabled]:opacity-40 data-[disabled]:cursor-not-allowed;
+}
+
+/* Dark mode: the accent is a light teal, so white text on it fails contrast.
+   Existing "bg-terracotta text-white" pairs get dark ink instead (icons follow via currentColor). */
+.dark .bg-terracotta.text-white,
+.dark .bg-terracotta .text-white {
+  color: var(--color-paper);
+}
+
+/* Destructive menu item (unlayered, so it must out-rank .radix-menu-item here, not via utilities) */
+.radix-menu-item.is-danger {
+  @apply text-red-600 data-[highlighted]:text-red-600 data-[highlighted]:bg-red-500/10;
+  @apply dark:text-red-400 dark:data-[highlighted]:text-red-400;
 }
 
 .radix-overlay {
