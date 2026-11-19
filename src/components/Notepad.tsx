@@ -324,7 +324,7 @@ export const Notepad: React.FC<NotepadProps> = ({
           {isCloudMode && (
             <button
               onClick={handleShare}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold border transition cursor-pointer select-none ${
+              className={`flex items-center gap-1.5 px-3 py-1 pointer-coarse:py-2.5 rounded-lg text-xs font-semibold border transition cursor-pointer select-none ${
                 copied
                   ? 'bg-terracotta border-terracotta text-white hover:bg-terracotta-hover'
                   : 'border-paper-darker text-ink-muted hover:border-terracotta/40 hover:text-terracotta bg-paper-dark'
@@ -339,7 +339,7 @@ export const Notepad: React.FC<NotepadProps> = ({
           {/* Malayalam / Manglish Transliteration Toggle */}
           <button
             onClick={handleToggleManglish}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold border transition cursor-pointer select-none ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 pointer-coarse:py-2.5 rounded-lg text-xs font-semibold border transition cursor-pointer select-none ${
               manglishActive
                 ? 'bg-terracotta border-terracotta text-white shadow-xs'
                 : 'border-paper-darker text-ink-muted hover:border-terracotta/40 hover:text-terracotta bg-paper-dark'
@@ -371,7 +371,9 @@ export const Notepad: React.FC<NotepadProps> = ({
             <div className="relative">
               <button
                 onClick={() => setShowPresets(!showPresets)}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold border transition cursor-pointer select-none ${
+                aria-label="Subconscious writing timer"
+                aria-expanded={showPresets}
+                className={`flex items-center gap-1.5 px-3 py-1 pointer-coarse:py-2.5 rounded-lg text-xs font-semibold border transition cursor-pointer select-none ${
                   showPresets 
                     ? 'bg-terracotta border-terracotta text-white' 
                     : 'border-paper-darker text-ink-muted hover:border-terracotta/40 hover:text-terracotta bg-paper-dark'

@@ -22,7 +22,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
 
   return (
     <header
-      className={`h-10 w-full bg-paper border-b border-paper-darker flex items-center justify-between px-4 select-none flex-shrink-0 transition-all duration-500 ${
+      className={`h-10 pointer-coarse:h-14 w-full bg-paper border-b border-paper-darker flex items-center justify-between px-4 select-none flex-shrink-0 transition-all duration-500 ${
         subconsciousActive ? 'opacity-10 pointer-events-none' : ''
       }`}
     >
@@ -47,7 +47,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
       <div className="flex items-center gap-3">
         <button
           onClick={toggleTheme}
-          className="w-8 h-8 flex items-center justify-center text-ink-muted hover:text-ink hover:bg-paper-active transition rounded-lg cursor-pointer"
+          className="w-8 h-8 pointer-coarse:w-11 pointer-coarse:h-11 flex items-center justify-center text-ink-muted hover:text-ink hover:bg-paper-active transition rounded-lg cursor-pointer"
           title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
         >
@@ -61,7 +61,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
         {onSignOut && (
           <button
             onClick={onSignOut}
-            className="h-8 px-3 text-xs font-medium text-ink-muted hover:text-ink hover:bg-paper-active transition border border-paper-darker rounded-lg cursor-pointer"
+            className="h-8 pointer-coarse:h-11 px-3 text-xs font-medium text-ink-muted hover:text-ink hover:bg-paper-active transition border border-paper-darker rounded-lg cursor-pointer"
           >
             Sign out
           </button>

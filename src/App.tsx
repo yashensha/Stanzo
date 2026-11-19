@@ -253,6 +253,7 @@ function App() {
         penName={penName}
         setPenName={setPenName}
         googleDefaultName={googleDefaultName}
+        onGoHome={() => navigate('/')}
       />
     );
   }

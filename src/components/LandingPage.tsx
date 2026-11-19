@@ -230,7 +230,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                             <button
                               aria-label="Song actions"
                               onClick={(e) => e.stopPropagation()}
-                              className="w-8 h-8 flex items-center justify-center rounded-lg text-ink-muted hover:bg-paper-active hover:text-ink transition cursor-pointer"
+                              className="w-8 h-8 pointer-coarse:w-11 pointer-coarse:h-11 flex items-center justify-center rounded-lg text-ink-muted hover:bg-paper-active hover:text-ink transition cursor-pointer"
                             >
                               <MoreHorizontal className="w-4 h-4" />
                             </button>
