@@ -35,12 +35,8 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   rhymeError,
   onClearRhymes,
   onSearchRhymes,
-  isMalayalamMode = false,
 }) => {
   const getHeaderLabel = () => {
-    if (isMalayalamMode && (activePanel === 'rhyme' || activePanel === 'density' || activePanel === 'swap' || activePanel === 'malayalam')) {
-      return 'മലയാളം നിഘണ്ടു & മീറ്റർ';
-    }
     switch (activePanel) {
       case 'info':
         return 'Project Info';
@@ -88,12 +84,6 @@ export const RightPanel: React.FC<RightPanelProps> = ({
         <ScrapbookPanel projectId={activeDraft.id} />
       ) : activePanel === 'audio' ? (
         <VoiceMemosPanel projectId={activeDraft.id} />
-      ) : isMalayalamMode ? (
-        <MalayalamWordFinderPanel
-          lookupWord={lookupWord}
-          onSelectWord={onSearchRhymes}
-          onClearLookup={onClearRhymes}
-        />
       ) : activePanel === 'rhyme' ? (
         <RhymePanel
           lookupWord={lookupWord}

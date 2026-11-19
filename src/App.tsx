@@ -98,12 +98,8 @@ function App() {
     return manglishActive || isMalayalam(activeDraft?.content || '') || isMalayalam(activeDraft?.title || '');
   }, [manglishActive, activeDraft?.content, activeDraft?.title]);
 
-  // When in Malayalam mode, automatically switch away from English-only panels
+  // English tools stay available in every mode; only the Malayalam dictionary is mode-dependent.
   useEffect(() => {
-    if (isMalayalamMode && (activeRightPanel === 'rhyme' || activeRightPanel === 'density' || activeRightPanel === 'swap')) {
-      setActiveRightPanel('malayalam');
-    }
-    // ...and away from the Malayalam dictionary when writing in English
     if (!isMalayalamMode && activeRightPanel === 'malayalam') {
       setActiveRightPanel('rhyme');
     }
@@ -116,7 +112,8 @@ function App() {
     setLookupWord(word_clean);
     setIsRightSidebarOpen(true);
 
-    if (isMalayalam(word_clean) || isMalayalamMode) {
+    // Route by the word itself: an English word goes to Rhyme Finder even in a Malayalam song.
+    if (isMalayalam(word_clean)) {
       setActiveRightPanel('malayalam');
       return;
     }

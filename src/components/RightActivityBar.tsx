@@ -50,14 +50,12 @@ export const RightActivityBar: React.FC<RightActivityBarProps> = ({
     { id: 'audio', label: 'Voice Memos', icon: Mic },
   ];
 
-  // English-only writing tools: hidden in Malayalam mode
-  const writingItems: RailItem[] = isMalayalamMode
-    ? []
-    : [
-        { id: 'rhyme', label: 'Rhyme Finder', icon: Search },
-        { id: 'density', label: 'Rhyme Density Scorer', icon: Activity },
-        { id: 'swap', label: 'Phonetic Word Swap', icon: Shuffle },
-      ];
+  // English writing tools: always available, whatever language the song is in
+  const writingItems: RailItem[] = [
+    { id: 'rhyme', label: 'Rhyme Finder', icon: Search },
+    { id: 'density', label: 'Rhyme Density Scorer', icon: Activity },
+    { id: 'swap', label: 'Phonetic Word Swap', icon: Shuffle },
+  ];
 
   const renderItem = (item: RailItem) => {
     const Icon = item.icon;
