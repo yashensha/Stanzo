@@ -4,7 +4,7 @@ import { Input } from './ui/Input';
 import { EmptyState } from './ui/Panel';
 import { analyzeMalayalamWord, isMalayalam } from '../utils/malayalamProsody';
 import type { WordMeterProfile } from '../utils/malayalamProsody';
-import { transliterateWord, fetchGoogleTransliteration, getTransliterationSync } from '../utils/manglishTransliterate';
+import { transliterateWord, fetchGoogleTransliteration, getTransliterationSync, canonicalNta } from '../utils/manglishTransliterate';
 
 interface SynItem {
   w: string;
@@ -136,7 +136,9 @@ export const MalayalamWordFinderPanel: React.FC<MalayalamWordFinderPanelProps> =
   // Lookup word frequency in songs
   const activeWordFreq = useMemo(() => {
     if (!activeQuery || coreDict.length === 0) return null;
-    const match = coreDict.find(item => item.w === activeQuery);
+    // The corpus mixes ന്റ / ൻ്റ spellings; compare on one form.
+    const q = canonicalNta(activeQuery);
+    const match = coreDict.find(item => item.w === activeQuery || canonicalNta(item.w) === q);
     return match ? { freq: match.f, songs: match.s } : null;
   }, [activeQuery, coreDict]);
 

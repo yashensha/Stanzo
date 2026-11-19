@@ -151,16 +151,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <p className="text-sm text-ink-muted py-12 text-center">No songs match "{query}".</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {!query && (
-                <button
-                  onClick={onCreateDraft}
-                  className="group min-h-[160px] rounded-2xl border-2 border-dashed border-paper-darker text-ink-muted hover:border-terracotta hover:text-terracotta hover:bg-terracotta-light/60 transition-colors flex flex-col items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
-                  <span className="text-sm font-medium">New song</span>
-                </button>
-              )}
-
               {visibleDrafts.map((draft) => (
                 <ContextMenu.Root key={draft.id}>
                   <ContextMenu.Trigger asChild>

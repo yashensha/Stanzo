@@ -57,7 +57,6 @@ export const RightActivityBar: React.FC<RightActivityBarProps> = ({
         { id: 'rhyme', label: 'Rhyme Finder', icon: Search },
         { id: 'density', label: 'Rhyme Density Scorer', icon: Activity },
         { id: 'swap', label: 'Phonetic Word Swap', icon: Shuffle },
-        MALAYALAM,
       ];
 
   const renderItem = (item: RailItem) => {

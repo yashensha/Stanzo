@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Search, MousePointerClick } from 'lucide-react';
+import { X, Search, MousePointerClick, WifiOff, RotateCw } from 'lucide-react';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { Chip, EmptyState, SectionLabel } from './ui/Panel';
@@ -60,7 +60,8 @@ export const RhymePanel: React.FC<RhymePanelProps> = ({
       data.perfect_bigrams.length > 0 ||
       data.slant_bigrams.length > 0);
 
-  const showEmptyState = !isLoading && (error || (data && !hasResults));
+  const showErrorState = !isLoading && !!error;
+  const showEmptyState = !isLoading && !error && data && !hasResults;
 
   // Single words can be searched again (double-click); phrases are display-only.
   const groups = data
@@ -120,6 +121,18 @@ export const RhymePanel: React.FC<RhymePanelProps> = ({
               </div>
             ))}
           </div>
+        )}
+
+        {showErrorState && (
+          <EmptyState icon={<WifiOff className="w-5 h-5" />} title="Couldn't load rhymes">
+            <span className="block mb-4">The rhyme service didn't respond. Check your connection and try again.</span>
+            {lookupWord && (
+              <Button size="sm" variant="secondary" onClick={() => onSearch(lookupWord)}>
+                <RotateCw className="w-3.5 h-3.5" />
+                Try again
+              </Button>
+            )}
+          </EmptyState>
         )}
 
         {showEmptyState && (

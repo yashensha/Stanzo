@@ -165,6 +165,29 @@ const CHILLU_MAP: Record<string, string> = {
 };
 
 /**
+ * "nta" (as in എൻ്റെ) has three encodings in the wild: ന്റ (ന + ് + റ), ൻറ (old chillu form)
+ * and ൻ്റ (chillu + ് + റ). Many fonts show ന്റ as a broken ന്‌റ, so we always emit ൻ്റ,
+ * the form that renders as one glyph everywhere.
+ */
+export function canonicalNta(text: string): string {
+  return text.replace(/ന്റ|ൻറ/g, 'ൻ്റ');
+}
+
+/** Canonicalise and de-duplicate candidates, keeping Google's order otherwise. */
+function rankCandidates(candidates: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const c of candidates) {
+    const canon = canonicalNta(c);
+    if (!seen.has(canon)) {
+      seen.add(canon);
+      out.push(canon);
+    }
+  }
+  return out;
+}
+
+/**
  * In-memory cache for ultra-fast, 0ms synchronous lookups
  */
 const transliterationCache = new Map<string, string[]>();
@@ -211,7 +234,7 @@ export async function fetchGoogleTransliteration(input: string, num: number = 5)
     if (res.ok) {
       const data = await res.json();
       if (data && data[0] === 'SUCCESS' && data[1]?.[0]?.[1]?.length > 0) {
-        const candidates: string[] = data[1][0][1];
+        const candidates = rankCandidates(data[1][0][1]);
         transliterationCache.set(clean, candidates);
         return candidates;
       }
@@ -320,7 +343,7 @@ export function transliterateWord(input: string): string {
     }
   }
 
-  return result.replace(/\u0D4D{2,}/g, '\u0D4D');
+  return canonicalNta(result.replace(/\u0D4D{2,}/g, '\u0D4D'));
 }
 
 /**

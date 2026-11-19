@@ -1,8 +1,16 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  // Read-only word tools (rhymes, swaps, density) need the recommender worker, which is
+  // rarely running locally. Send them to the deployed API unless a local target is set.
+  // Everything else (projects, auth, storage) stays on the local API so dev never writes to prod.
+  const wordToolsTarget = env.WORD_TOOLS_PROXY_TARGET || env.VITE_API_URL || 'http://localhost:5001'
+  const wordToolsProxy = { target: wordToolsTarget, changeOrigin: true }
+
+  return {
   envPrefix: ['VITE_'],
   plugins: [
     react(),
@@ -40,6 +48,10 @@ export default defineConfig({
   ],
   server: {
     proxy: {
+      '/api/rhyme': wordToolsProxy,
+      '/api/synonyms': wordToolsProxy,
+      '/api/phonetic-swap': wordToolsProxy,
+      '/api/semantic-search': wordToolsProxy,
       '/api': {
         target: 'http://localhost:5001',
         changeOrigin: true,
@@ -50,5 +62,6 @@ export default defineConfig({
         changeOrigin: true,
       }
     }
+  }
   }
 })

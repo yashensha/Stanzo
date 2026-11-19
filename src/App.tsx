@@ -103,6 +103,10 @@ function App() {
     if (isMalayalamMode && (activeRightPanel === 'rhyme' || activeRightPanel === 'density' || activeRightPanel === 'swap')) {
       setActiveRightPanel('malayalam');
     }
+    // ...and away from the Malayalam dictionary when writing in English
+    if (!isMalayalamMode && activeRightPanel === 'malayalam') {
+      setActiveRightPanel('rhyme');
+    }
   }, [isMalayalamMode, activeRightPanel]);
 
   const handleWordDoubleClicked = async (word: string) => {
@@ -128,7 +132,15 @@ function App() {
         throw new Error('Failed to fetch rhymes');
       }
       const data = await response.json();
-      setRhymeResults(data);
+      if (data?.error) throw new Error(data.error);
+      // Normalise: a partial payload must never crash the panel.
+      setRhymeResults({
+        word: data?.word ?? word_clean,
+        perfect: data?.perfect ?? [],
+        slant: data?.slant ?? [],
+        perfect_bigrams: data?.perfect_bigrams ?? [],
+        slant_bigrams: data?.slant_bigrams ?? [],
+      });
     } catch (err: any) {
       setRhymeError(err.message || 'Error fetching rhymes');
     } finally {

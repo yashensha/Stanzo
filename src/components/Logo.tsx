@@ -7,21 +7,26 @@ interface LogoMarkProps {
   className?: string;
 }
 
-/** Placeholder mark: a squircle with three "stanza" lines and a note-head dot. Swap for the final logo later. */
+/** Brand mark: two stacked rounded bars. */
 export function LogoMark({ size = 28, className }: LogoMarkProps) {
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 32 32"
+      viewBox="0 0 150 150"
       fill="none"
       role="img"
       aria-label={BRAND_NAME}
       className={cn('shrink-0', className)}
     >
-      <rect width="32" height="32" rx="9" fill="var(--color-terracotta)" />
-      <path d="M8 11h16M8 16h9M8 21h16" stroke="var(--color-paper)" strokeWidth="2.2" strokeLinecap="round" />
-      <circle cx="22.5" cy="16" r="2.4" fill="var(--color-paper)" />
+      <path
+        fill="#3ec0dd"
+        d="M39.36,141.93c-8.27-14.33-12.41-21.5-10.55-28.43,1.86-6.94,8.94-11.02,23.09-19.2l60.85-35.13,4.49,7.77c6.13,10.62,9.2,15.93,7.8,21.13-1.39,5.2-6.7,8.27-17.32,14.4l-68.35,39.46Z"
+      />
+      <path
+        fill="#3ec0dd"
+        d="M34.87,81.7c-6.13-10.62-9.2-15.93-7.8-21.13,1.39-5.2,6.7-8.27,17.32-14.4L112.75,6.7l4.49,7.77c6.13,10.62,9.2,15.93,7.8,21.13-1.39,5.2-6.7,8.27-17.32,14.4L39.36,89.47l-4.49-7.77Z"
+      />
     </svg>
   );
 }
