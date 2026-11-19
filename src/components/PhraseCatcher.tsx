@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, CornerDownRight, Search } from 'lucide-react';
+import { Plus, Trash2, CornerDownRight, Search, Sparkles } from 'lucide-react';
+import { Input } from './ui/Input';
+import { Button } from './ui/Button';
+import { EmptyState } from './ui/Panel';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { api } from '../utils/apiClient';
@@ -99,70 +102,73 @@ export const PhraseCatcher: React.FC<PhraseCatcherProps> = ({
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-transparent">
       {/* Phrase Input */}
-      <form onSubmit={handleAddPhrase} className="p-4 border-b border-paper-darker select-none flex items-center gap-2">
-        <input
-          type="text"
-          placeholder="Catch a phrase..."
-          value={newPhraseText}
-          onChange={(e) => setNewPhraseText(e.target.value)}
-          spellCheck="false"
-          className="flex-1 bg-paper border border-paper-darker rounded px-3 py-1.5 text-xs text-ink placeholder-ink-light focus:outline-none focus:border-terracotta transition select-text"
-        />
-        <button
-          type="submit"
-          disabled={!newPhraseText.trim()}
-          className="p-1.5 bg-paper border border-paper-darker text-ink-muted hover:text-ink hover:bg-paper-darker disabled:opacity-40 disabled:cursor-not-allowed rounded transition cursor-pointer flex items-center justify-center"
-          title="Add Phrase"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
-      </form>
-
-      {/* Search Input */}
-      <div className="px-4 pb-3 pt-1 border-b border-paper-darker select-none flex items-center gap-2 relative">
-        <div className="relative flex-1">
-          <input
+      <div className="p-4 border-b border-paper-darker select-none flex flex-col gap-2">
+        <form onSubmit={handleAddPhrase} className="flex items-center gap-2">
+          <Input
+            inputSize="sm"
             type="text"
-            placeholder="Search phrases..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="New phrase"
+            placeholder="Catch a phrase…"
+            value={newPhraseText}
+            onChange={(e) => setNewPhraseText(e.target.value)}
             spellCheck="false"
-            className="w-full bg-paper border border-paper-darker rounded pl-8 pr-3 py-1.5 text-xs text-ink placeholder-ink-light focus:outline-none focus:border-terracotta transition select-text"
+            className="flex-1 select-text"
           />
-          <Search className="w-3.5 h-3.5 text-ink-light absolute left-2.5 top-1/2 -translate-y-1/2" />
-        </div>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={!newPhraseText.trim()}
+            title="Add phrase"
+            aria-label="Add phrase"
+            className="w-8 px-0 flex-shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        </form>
+
+        {phrases.length > 0 && (
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 text-ink-light absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Input
+              inputSize="sm"
+              type="search"
+              aria-label="Search phrases"
+              placeholder="Search phrases"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              spellCheck="false"
+              className="pl-8 select-text"
+            />
+          </div>
+        )}
       </div>
 
       {/* Phrases List */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
         {isLoading ? (
-          <div className="text-center py-8 text-xs text-ink-light italic">
-            Loading phrases...
+          <div className="space-y-2.5 animate-pulse" role="status" aria-label="Loading phrases">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-16 rounded-xl bg-paper-active" />
+            ))}
           </div>
         ) : phrases.length === 0 ? (
-          <div className="text-center py-12 select-none">
-            <p className="text-xs text-ink-muted font-serif italic">
-              Scratchpad is empty. Catch your first lyric snippet above.
-            </p>
-          </div>
+          <EmptyState icon={<Sparkles className="w-5 h-5" />} title="No phrases yet">
+            Catch lines and hooks here before they slip away.
+          </EmptyState>
         ) : filteredPhrases.length === 0 ? (
-          <div className="text-center py-12 select-none">
-            <p className="text-xs text-ink-muted font-serif italic">
-              No matching phrases found.
-            </p>
-          </div>
+          <p className="text-xs text-ink-muted text-center py-8">No phrases match "{searchQuery}".</p>
         ) : (
           filteredPhrases.map((phrase) => (
             <div
               key={phrase.id}
-              className="bg-paper border border-paper-darker rounded-lg p-3 relative flex flex-col justify-between group hover:border-terracotta/20 transition-all duration-200 card-warm"
+              className="bg-paper border border-paper-darker rounded-xl p-3 relative group hover:border-ink-light transition-colors"
             >
-              <p className="text-xs text-ink font-serif leading-relaxed mb-4 pr-12 select-text break-words whitespace-pre-wrap">
+              <p className="text-sm text-ink leading-relaxed pr-16 select-text break-words whitespace-pre-wrap">
                 {phrase.content}
               </p>
 
               {/* Action Buttons */}
-              <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150">
+              <div className="absolute top-2 right-2 flex items-center gap-1 opacity-100 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:group-focus-within:opacity-100 transition-opacity duration-150">
                 {/* Import Button */}
                 <Tooltip.Provider delayDuration={200}>
                   <Tooltip.Root>
@@ -171,7 +177,7 @@ export const PhraseCatcher: React.FC<PhraseCatcherProps> = ({
                         <button
                           onClick={() => isProjectOpen && onImportPhrase && onImportPhrase(phrase.content)}
                           disabled={!isProjectOpen}
-                          className="p-1 text-ink-muted hover:text-terracotta disabled:opacity-40 disabled:hover:text-ink-muted disabled:cursor-not-allowed bg-paper border border-paper-darker hover:bg-paper-darker rounded transition cursor-pointer"
+                          className="w-7 h-7 flex items-center justify-center text-ink-muted hover:text-terracotta hover:bg-paper-active disabled:opacity-40 disabled:hover:text-ink-muted disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
                           aria-label="Import to active editor"
                         >
                           <CornerDownRight className="w-3.5 h-3.5" />
@@ -180,7 +186,7 @@ export const PhraseCatcher: React.FC<PhraseCatcherProps> = ({
                     </Tooltip.Trigger>
                     <Tooltip.Portal>
                       <Tooltip.Content
-                        className="bg-ink text-paper text-[10px] px-2.5 py-1 rounded shadow-paper-md max-w-xs z-50 select-none"
+                        className="bg-ink text-paper text-xs px-2.5 py-1.5 rounded-lg shadow-paper-md max-w-xs z-50 select-none"
                         side="right"
                         sideOffset={6}
                       >
@@ -197,7 +203,7 @@ export const PhraseCatcher: React.FC<PhraseCatcherProps> = ({
                 {/* Delete Trigger */}
                 <button
                   onClick={() => setDeletingPhraseId(phrase.id)}
-                  className="p-1 text-ink-muted hover:text-terracotta bg-paper border border-paper-darker hover:bg-paper-darker rounded transition cursor-pointer"
+                  className="w-7 h-7 flex items-center justify-center text-ink-muted hover:text-red-600 dark:hover:text-red-400 hover:bg-paper-active rounded-lg transition-colors cursor-pointer"
                   aria-label="Delete phrase"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -216,29 +222,28 @@ export const PhraseCatcher: React.FC<PhraseCatcherProps> = ({
         <AlertDialog.Portal>
           <AlertDialog.Overlay className="radix-overlay" />
           <AlertDialog.Content className="radix-dialog-content select-none">
-            <AlertDialog.Title className="text-sm font-bold text-ink mb-2">
-              Delete Phrase
+            <AlertDialog.Title className="text-base font-semibold text-ink mb-2">
+              Delete phrase?
             </AlertDialog.Title>
-            <AlertDialog.Description className="text-xs text-ink-muted mb-5">
-              Are you sure you want to delete this phrase? This action will remove it permanently.
+            <AlertDialog.Description className="text-sm text-ink-muted mb-6">
+              This removes the phrase permanently.
             </AlertDialog.Description>
             <div className="flex justify-end gap-2">
               <AlertDialog.Cancel asChild>
-                <button className="px-3.5 py-1.5 border border-paper-darker rounded-md text-xs font-semibold text-ink-muted hover:bg-paper-active transition cursor-pointer">
-                  Cancel
-                </button>
+                <Button variant="secondary" size="sm">Cancel</Button>
               </AlertDialog.Cancel>
               <AlertDialog.Action asChild>
-                <button
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={() => {
                     if (deletingPhraseId) {
                       handleDeletePhrase(deletingPhraseId);
                     }
                   }}
-                  className="px-3.5 py-1.5 bg-terracotta hover:bg-terracotta-hover text-white rounded-md text-xs font-semibold transition cursor-pointer"
                 >
                   Delete
-                </button>
+                </Button>
               </AlertDialog.Action>
             </div>
           </AlertDialog.Content>

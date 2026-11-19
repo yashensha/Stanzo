@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { X, Check, Edit2, Plus, Save } from 'lucide-react';
+import { X, Check, Edit2, Plus, Save, ChevronDown } from 'lucide-react';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
 import * as Select from '@radix-ui/react-select';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -60,7 +62,7 @@ const TagInput: React.FC<TagInputProps> = ({ label, tags, onChange }) => {
 
   return (
     <div className="space-y-2">
-      <label className="block text-xs font-semibold text-ink uppercase tracking-wider">
+      <label className="block text-xs font-semibold text-ink-muted">
         {label}
       </label>
 
@@ -70,13 +72,13 @@ const TagInput: React.FC<TagInputProps> = ({ label, tags, onChange }) => {
           {tags.map((tag, idx) => (
             <span
               key={idx}
-              className="inline-flex items-center gap-1 bg-paper-dark text-ink text-xs px-2 py-0.5 rounded border border-paper-darker font-medium"
+              className="inline-flex items-center gap-1 bg-paper text-ink text-sm pl-3 pr-1 py-0.5 rounded-full border border-paper-darker"
             >
               {tag}
               <button
                 type="button"
                 onClick={() => handleRemove(tag)}
-                className="text-ink-muted hover:text-terracotta p-0.5 rounded cursor-pointer transition-colors"
+                className="w-5 h-5 flex items-center justify-center text-ink-muted hover:text-ink hover:bg-paper-active rounded-full cursor-pointer transition-colors"
                 aria-label={`Remove ${tag}`}
               >
                 <X className="w-3 h-3" />
@@ -88,29 +90,28 @@ const TagInput: React.FC<TagInputProps> = ({ label, tags, onChange }) => {
 
       {/* Input row with + button */}
       <div className="flex items-center gap-1.5">
-        <input
+        <Input
           ref={inputRef}
+          inputSize="sm"
           type="text"
+          aria-label={`Add ${label}`}
           placeholder="Add name…"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="flex-1 bg-paper border border-paper-darker rounded px-2.5 py-1.5 text-xs text-ink placeholder-ink-light focus:outline-none focus:border-terracotta transition-colors"
+          className="flex-1"
           spellCheck={false}
         />
-        <button
-          type="button"
+        <Button
+          size="sm"
+          variant={inputValue.trim() ? 'primary' : 'secondary'}
           onClick={commitCurrent}
           disabled={!inputValue.trim()}
           aria-label={`Add ${label}`}
-          className={`flex items-center justify-center w-7 h-7 rounded border transition-colors ${
-            inputValue.trim()
-              ? 'bg-terracotta border-terracotta text-white hover:bg-terracotta-hover cursor-pointer'
-              : 'bg-paper border-paper-darker text-ink-light cursor-not-allowed'
-          }`}
+          className="w-8 px-0 flex-shrink-0"
         >
-          <Plus className="w-3.5 h-3.5" />
-        </button>
+          <Plus className="w-4 h-4" />
+        </Button>
       </div>
     </div>
   );
@@ -242,8 +243,8 @@ export const ProjectInfoPanel: React.FC<ProjectInfoPanelProps> = ({
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* Song Title */}
         <div className="space-y-2">
-          <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider">
-            Song Title
+          <label className="block text-xs font-semibold text-ink-muted">
+            Song title
           </label>
           {isEditingTitle ? (
             <div className="flex items-center gap-2">
@@ -256,32 +257,35 @@ export const ProjectInfoPanel: React.FC<ProjectInfoPanelProps> = ({
                 }}
                 onKeyDown={handleTitleKeyDown}
                 onBlur={() => setIsEditingTitle(false)}
-                className="flex-1 bg-paper border border-terracotta rounded px-3 py-1.5 text-sm font-semibold text-ink focus:outline-none transition select-text"
+                aria-label="Song title"
+                className="flex-1 h-9 bg-paper border border-terracotta rounded-xl px-3 text-sm font-semibold text-ink focus:outline-none focus:ring-2 focus:ring-terracotta/30 transition select-text"
                 spellCheck={false}
               />
-              <button
-                type="button"
+              <Button
+                size="sm"
                 onClick={() => setIsEditingTitle(false)}
-                className="p-1.5 bg-terracotta text-white rounded hover:bg-terracotta-hover transition cursor-pointer"
-                title="Confirm Title"
+                title="Confirm title"
+                aria-label="Confirm title"
+                className="w-9 h-9 px-0"
               >
                 <Check className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
           ) : (
-            <div
+            <button
+              type="button"
               onClick={() => setIsEditingTitle(true)}
-              className="group flex items-center justify-between p-2 hover:bg-paper-darker rounded cursor-pointer border border-transparent hover:border-paper-darker transition-all"
+              className="group w-full text-left flex items-center justify-between px-3 py-2 bg-paper hover:border-ink-light rounded-xl cursor-pointer border border-paper-darker transition-colors"
               title="Click to edit title"
             >
-              <span className="font-serif font-bold text-lg text-ink truncate mr-2">
+              <span className="font-semibold text-lg text-ink truncate mr-2">
                 {formTitle || 'Untitled Song'}
               </span>
-              <Edit2 className="w-3.5 h-3.5 text-ink-light group-hover:text-ink-muted transition flex-shrink-0" />
-            </div>
+              <Edit2 className="w-3.5 h-3.5 text-ink-light group-hover:text-ink transition flex-shrink-0" />
+            </button>
           )}
           {errors.title && (
-            <span className="text-[10px] text-terracotta font-semibold mt-1 block">
+            <span role="alert" className="text-xs text-red-600 dark:text-red-400 mt-1 block">
               {errors.title.message}
             </span>
           )}
@@ -289,7 +293,7 @@ export const ProjectInfoPanel: React.FC<ProjectInfoPanelProps> = ({
 
         {/* Status */}
         <div className="space-y-2">
-          <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider">
+          <label className="block text-xs font-semibold text-ink-muted">
             Status
           </label>
           <Controller
@@ -298,12 +302,12 @@ export const ProjectInfoPanel: React.FC<ProjectInfoPanelProps> = ({
             render={({ field }) => (
               <Select.Root value={field.value} onValueChange={field.onChange}>
                 <Select.Trigger
-                  className="w-full flex items-center justify-between bg-paper border border-paper-darker rounded px-3 py-2 text-xs text-ink focus:outline-none focus:border-terracotta transition select-none cursor-pointer"
+                  className="w-full h-10 flex items-center justify-between bg-paper border border-paper-darker rounded-xl px-3 text-sm text-ink focus:outline-none focus:border-terracotta focus:ring-2 focus:ring-terracotta/30 transition select-none cursor-pointer hover:border-ink-light"
                   aria-label="Project Status"
                 >
                   <Select.Value />
                   <Select.Icon>
-                    <Plus className="w-4 h-4 text-ink-muted rotate-45 transform" />
+                    <ChevronDown className="w-4 h-4 text-ink-muted" />
                   </Select.Icon>
                 </Select.Trigger>
 
@@ -357,19 +361,16 @@ export const ProjectInfoPanel: React.FC<ProjectInfoPanelProps> = ({
       </div>
 
       {/* ── Sticky Save bar ─────────────────────────────────────────────── */}
-      <div className="border-t border-paper-darker px-4 py-3 bg-paper flex-shrink-0">
-        <button
+      <div className="border-t border-paper-darker p-4 bg-paper-dark flex-shrink-0">
+        <Button
           type="submit"
+          variant={isDirty ? 'primary' : 'secondary'}
           disabled={!isDirty}
-          className={`w-full flex items-center justify-center gap-2 rounded px-4 py-2 text-xs font-semibold tracking-wide transition-all ${
-            isDirty
-              ? 'bg-terracotta text-white hover:bg-terracotta-hover shadow-sm cursor-pointer'
-              : 'bg-paper-dark text-ink-light border border-paper-darker cursor-not-allowed'
-          }`}
+          className="w-full disabled:opacity-100 disabled:text-ink-muted"
         >
-          <Save className="w-3.5 h-3.5" />
-          {isDirty ? 'Save Changes' : 'No Changes'}
-        </button>
+          <Save className="w-4 h-4" />
+          {isDirty ? 'Save changes' : 'All changes saved'}
+        </Button>
       </div>
     </form>
   );

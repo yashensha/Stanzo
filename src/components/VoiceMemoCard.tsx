@@ -101,22 +101,23 @@ export const VoiceMemoCard: React.FC<VoiceMemoCardProps> = ({
   };
 
   return (
-    <div className="bg-paper border border-paper-darker rounded-lg p-3 shadow-sm flex flex-col gap-2 select-none relative group transition-all duration-200 hover:border-paper-darkest hover:shadow-paper-sm">
+    <div className="bg-paper border border-paper-darker rounded-xl p-3 flex flex-col gap-2 select-none relative group transition-colors hover:border-ink-light">
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-mono text-ink-muted">
+        <span className="text-xs text-ink-muted">
           {formatDate(memo.created_at)}
         </span>
 
         {memo.isOptimistic ? (
-          <span className="flex items-center gap-1 text-[9px] bg-paper-dark border border-paper-darker text-ink-light px-1.5 py-0.5 rounded font-mono">
-            <Loader2 className="w-2.5 h-2.5 animate-spin text-terracotta" /> Saving...
+          <span className="flex items-center gap-1 text-[11px] text-ink-muted" role="status">
+            <Loader2 className="w-3 h-3 animate-spin text-terracotta" /> Saving…
           </span>
         ) : (
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="text-ink-light hover:text-terracotta hover:bg-paper-darker p-1 rounded transition-colors duration-150 cursor-pointer"
-            title="Delete Memo"
+            className="w-7 h-7 flex items-center justify-center text-ink-muted hover:text-red-600 dark:hover:text-red-400 hover:bg-paper-active rounded-lg transition-colors duration-150 cursor-pointer"
+            title="Delete memo"
+            aria-label="Delete memo"
           >
             {isDeleting ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -131,12 +132,13 @@ export const VoiceMemoCard: React.FC<VoiceMemoCardProps> = ({
         <button
           onClick={onPlayToggle}
           disabled={!isReady}
-          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer ${
+          className={`w-9 h-9 flex-shrink-0 rounded-full flex items-center justify-center transition-colors duration-150 cursor-pointer active:scale-95 ${
             isPlaying
               ? 'bg-terracotta hover:bg-terracotta-hover text-white'
-              : 'bg-paper-dark hover:bg-paper-darker text-ink hover:text-terracotta'
+              : 'bg-terracotta-light text-terracotta hover:bg-paper-active'
           } disabled:opacity-40 disabled:cursor-not-allowed`}
           title={isPlaying ? 'Pause' : 'Play'}
+          aria-label={isPlaying ? 'Pause' : 'Play'}
         >
           {isPlaying ? (
             <Pause className="w-4 h-4 fill-current stroke-[1.5]" />
@@ -145,9 +147,9 @@ export const VoiceMemoCard: React.FC<VoiceMemoCardProps> = ({
           )}
         </button>
 
-        <div className="flex-1 min-h-[36px] bg-paper-dark/30 rounded border border-dashed border-paper-darker/60 px-2 flex items-center relative">
+        <div className="flex-1 min-h-[36px] px-1 flex items-center relative">
           {!isReady && !memo.isOptimistic && (
-            <div className="absolute inset-0 flex items-center justify-center bg-paper/60 backdrop-blur-[0.5px] rounded z-10">
+            <div className="absolute inset-0 flex items-center justify-center bg-paper/60 rounded-lg z-10">
               <Loader2 className="w-4 h-4 animate-spin text-terracotta" />
             </div>
           )}

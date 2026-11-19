@@ -62,16 +62,17 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   };
 
   return (
-    <div className="w-80 h-full bg-paper-dark/70 border-l border-paper-darker flex flex-col flex-shrink-0 z-10">
+    <aside className="w-80 h-full bg-paper-dark border-l border-paper-darker flex flex-col flex-shrink-0 z-10">
       {/* Header */}
       <div className="h-14 px-4 border-b border-paper-darker flex items-center justify-between select-none flex-shrink-0">
-        <span className="font-semibold tracking-wide text-ink text-sm uppercase">
+        <h2 className="font-semibold text-ink text-lg truncate">
           {getHeaderLabel()}
-        </span>
+        </h2>
         <button
           onClick={() => setIsSidebarOpen(false)}
-          className="text-ink-muted hover:text-ink hover:bg-paper-darker p-1 rounded cursor-pointer"
-          title="Collapse Panel"
+          className="w-8 h-8 flex items-center justify-center text-ink-muted hover:text-ink hover:bg-paper-active rounded-lg cursor-pointer transition-colors flex-shrink-0"
+          title="Collapse panel"
+          aria-label="Collapse panel"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
@@ -113,6 +114,6 @@ export const RightPanel: React.FC<RightPanelProps> = ({
           onClearLookup={onClearRhymes}
         />
       )}
-    </div>
+    </aside>
   );
 };

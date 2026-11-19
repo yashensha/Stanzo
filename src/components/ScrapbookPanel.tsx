@@ -245,19 +245,19 @@ export const ScrapbookPanel: React.FC<ScrapbookPanelProps> = ({ projectId }) => 
       `}</style>
 
       {loading ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-ink-light py-8">
+        <div className="flex-1 flex flex-col items-center justify-center text-ink-muted py-8" role="status">
           <Loader2 className="w-5 h-5 animate-spin text-terracotta mb-2" />
-          <span className="font-serif italic text-xs">Loading Scrapbook...</span>
+          <span className="text-xs">Loading scrapbook…</span>
         </div>
       ) : (
         <div className="flex-1 flex flex-col min-h-0 overflow-y-auto paper-lines relative">
           {editor && (
             <BubbleMenu editor={editor}>
-              <div className="flex items-center gap-0.5 bg-paper-dark border border-paper-darker rounded shadow-paper-md px-1.5 py-1 select-none">
+              <div className="flex items-center gap-0.5 bg-paper border border-paper-darker dark:bg-paper-darker dark:border-ink-light/40 rounded-xl shadow-paper-md p-1 select-none">
                 <button
                   type="button"
                   onClick={() => editor.chain().focus().toggleBold().run()}
-                  className={`p-1 rounded transition-colors duration-150 cursor-pointer ${
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors duration-150 cursor-pointer ${
                     editor.isActive('bold')
                       ? 'bg-terracotta text-white'
                       : 'text-ink-muted hover:text-ink hover:bg-paper-active'
@@ -269,7 +269,7 @@ export const ScrapbookPanel: React.FC<ScrapbookPanelProps> = ({ projectId }) => 
                 <button
                   type="button"
                   onClick={() => editor.chain().focus().toggleItalic().run()}
-                  className={`p-1 rounded transition-colors duration-150 cursor-pointer ${
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors duration-150 cursor-pointer ${
                     editor.isActive('italic')
                       ? 'bg-terracotta text-white'
                       : 'text-ink-muted hover:text-ink hover:bg-paper-active'
@@ -281,7 +281,7 @@ export const ScrapbookPanel: React.FC<ScrapbookPanelProps> = ({ projectId }) => 
                 <button
                   type="button"
                   onClick={() => editor.chain().focus().toggleStrike().run()}
-                  className={`p-1 rounded transition-colors duration-150 cursor-pointer ${
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors duration-150 cursor-pointer ${
                     editor.isActive('strike')
                       ? 'bg-terracotta text-white'
                       : 'text-ink-muted hover:text-ink hover:bg-paper-active'
@@ -296,11 +296,11 @@ export const ScrapbookPanel: React.FC<ScrapbookPanelProps> = ({ projectId }) => 
 
           {editor && (
             <FloatingMenu editor={editor}>
-              <div className="flex items-center gap-0.5 bg-paper-dark border border-paper-darker rounded shadow-paper-md px-1.5 py-1 select-none">
+              <div className="flex items-center gap-0.5 bg-paper border border-paper-darker dark:bg-paper-darker dark:border-ink-light/40 rounded-xl shadow-paper-md p-1 select-none">
                 <button
                   type="button"
                   onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                  className={`p-1 rounded transition-colors duration-150 cursor-pointer ${
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors duration-150 cursor-pointer ${
                     editor.isActive('heading', { level: 1 })
                       ? 'bg-terracotta text-white'
                       : 'text-ink-muted hover:text-ink hover:bg-paper-active'
@@ -312,7 +312,7 @@ export const ScrapbookPanel: React.FC<ScrapbookPanelProps> = ({ projectId }) => 
                 <button
                   type="button"
                   onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                  className={`p-1 rounded transition-colors duration-150 cursor-pointer ${
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors duration-150 cursor-pointer ${
                     editor.isActive('heading', { level: 2 })
                       ? 'bg-terracotta text-white'
                       : 'text-ink-muted hover:text-ink hover:bg-paper-active'
@@ -324,7 +324,7 @@ export const ScrapbookPanel: React.FC<ScrapbookPanelProps> = ({ projectId }) => 
                 <button
                   type="button"
                   onClick={() => editor.chain().focus().toggleBulletList().run()}
-                  className={`p-1 rounded transition-colors duration-150 cursor-pointer ${
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors duration-150 cursor-pointer ${
                     editor.isActive('bulletList')
                       ? 'bg-terracotta text-white'
                       : 'text-ink-muted hover:text-ink hover:bg-paper-active'
@@ -336,7 +336,7 @@ export const ScrapbookPanel: React.FC<ScrapbookPanelProps> = ({ projectId }) => 
                 <button
                   type="button"
                   onClick={() => editor.chain().focus().toggleBlockquote().run()}
-                  className={`p-1 rounded transition-colors duration-150 cursor-pointer ${
+                  className={`w-7 h-7 flex items-center justify-center rounded-lg transition-colors duration-150 cursor-pointer ${
                     editor.isActive('blockquote')
                       ? 'bg-terracotta text-white'
                       : 'text-ink-muted hover:text-ink hover:bg-paper-active'
@@ -353,9 +353,9 @@ export const ScrapbookPanel: React.FC<ScrapbookPanelProps> = ({ projectId }) => 
           
           {uploadingImage && (
             <div className="absolute inset-0 bg-paper/60 backdrop-blur-[1px] flex items-center justify-center z-20">
-              <div className="bg-paper-dark border border-paper-darker rounded-lg px-4 py-2 shadow-md flex items-center gap-2">
+              <div role="status" className="bg-paper-dark border border-paper-darker rounded-xl px-4 py-2.5 shadow-paper-md flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin text-terracotta" />
-                <span className="text-xs font-semibold text-ink">Uploading image...</span>
+                <span className="text-xs font-medium text-ink">Uploading image…</span>
               </div>
             </div>
           )}

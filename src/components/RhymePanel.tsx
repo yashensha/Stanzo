@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Search } from 'lucide-react';
+import { X, Search, MousePointerClick } from 'lucide-react';
+import { Input } from './ui/Input';
+import { Button } from './ui/Button';
+import { Chip, EmptyState, SectionLabel } from './ui/Panel';
 
 interface RhymeData {
   word: string;
@@ -59,158 +62,105 @@ export const RhymePanel: React.FC<RhymePanelProps> = ({
 
   const showEmptyState = !isLoading && (error || (data && !hasResults));
 
+  // Single words can be searched again (double-click); phrases are display-only.
+  const groups = data
+    ? [
+        { label: 'Perfect rhymes', items: data.perfect, searchable: true },
+        { label: 'Perfect phrases', items: data.perfect_bigrams, searchable: false },
+        { label: 'Slant rhymes', items: data.slant, searchable: true },
+        { label: 'Slant phrases', items: data.slant_bigrams, searchable: false },
+      ]
+    : [];
+
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-transparent">
-      {/* Header lookup word state */}
-      <div className="p-4 border-b border-paper-darker flex items-center justify-between min-h-14 select-none flex-shrink-0">
-        {lookupWord ? (
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <span className="text-[10px] uppercase font-bold text-ink-muted tracking-wider">Lookup:</span>
-            <span className="px-2.5 py-0.5 bg-paper border border-paper-darker text-terracotta font-serif text-sm font-semibold rounded truncate shadow-xs">
-              {lookupWord}
-            </span>
-          </div>
-        ) : (
-          <span className="text-xs text-ink-muted italic font-serif">
-            double click any word to find rhymes
-          </span>
-        )}
-
-        {lookupWord && (
-          <button
-            onClick={handleClearClick}
-            className="p-1 text-ink-muted hover:text-ink hover:bg-paper-darker rounded transition cursor-pointer flex-shrink-0 ml-2"
-            title="Clear current word"
-            aria-label="Clear current word"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        )}
-      </div>
-
-      {/* Manual Search Form */}
-      <form onSubmit={handleManualSearchSubmit} className="px-4 py-3 border-b border-paper-darker flex items-center gap-2 select-none flex-shrink-0 bg-paper-dark/10">
+      {/* Search */}
+      <form onSubmit={handleManualSearchSubmit} className="p-4 border-b border-paper-darker flex items-center gap-2 select-none flex-shrink-0">
         <div className="relative flex-1">
-          <input
+          <Search className="w-3.5 h-3.5 text-ink-light absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Input
+            inputSize="sm"
             type="text"
-            placeholder="Search rhymes manually..."
+            aria-label="Search rhymes"
+            placeholder="Find rhymes for…"
             value={manualInput}
             onChange={(e) => setManualInput(e.target.value)}
             spellCheck="false"
-            className="w-full bg-paper border border-paper-darker rounded pl-8 pr-3 py-1.5 text-xs text-ink placeholder-ink-light focus:outline-none focus:border-terracotta transition select-text"
+            className="pl-8 pr-8 select-text"
           />
-          <Search className="w-3.5 h-3.5 text-ink-light absolute left-2.5 top-1/2 -translate-y-1/2" />
+          {lookupWord && (
+            <button
+              type="button"
+              onClick={handleClearClick}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-ink-muted hover:text-ink rounded-md cursor-pointer"
+              title="Clear current word"
+              aria-label="Clear current word"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
-        <button
-          type="submit"
-          disabled={isLoading || !manualInput.trim()}
-          className="px-3 py-1.5 bg-paper border border-paper-darker text-ink-muted hover:text-ink hover:bg-paper-darker disabled:opacity-40 disabled:cursor-not-allowed rounded text-xs transition cursor-pointer font-medium"
-        >
+        <Button type="submit" size="sm" disabled={isLoading || !manualInput.trim()}>
           Find
-        </button>
+        </Button>
       </form>
 
-      {/* Rhyme Results Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      {/* Results */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-6" aria-live="polite">
         {isLoading && (
-          <div className="text-xs text-ink-muted font-serif italic py-4 select-none">
-            finding rhymes...
+          <div className="space-y-3" role="status" aria-label="Finding rhymes">
+            {[0, 1].map((i) => (
+              <div key={i} className="space-y-2 animate-pulse">
+                <div className="h-3 w-24 rounded bg-paper-darker" />
+                <div className="flex flex-wrap gap-1.5">
+                  {[56, 72, 48, 64, 52].map((w, j) => (
+                    <div key={j} className="h-7 rounded-full bg-paper-active" style={{ width: w }} />
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
         {showEmptyState && (
-          <div className="text-xs text-ink-muted font-serif italic py-4 select-none">
-            no rhymes found
-          </div>
+          <EmptyState icon={<Search className="w-5 h-5" />} title="No rhymes found">
+            Try a simpler form of the word, or check the spelling.
+          </EmptyState>
         )}
 
         {!lookupWord && !isLoading && !error && (
-          <div className="text-xs text-ink-muted font-serif italic py-4 select-none">
-            double click any word in the editor to load rhymes.
-          </div>
+          <EmptyState icon={<MousePointerClick className="w-5 h-5" />} title="Pick a word">
+            Double-click any word in your lyrics, or search above.
+          </EmptyState>
         )}
 
         {data && !isLoading && !error && hasResults && (
           <>
-            {/* 1. Perfect Rhymes */}
-            {data.perfect.length > 0 && (
-              <div className="space-y-2">
-                <span className="text-[10px] uppercase tracking-wider font-bold text-ink-light select-none block">
-                  Perfect Rhymes
-                </span>
+            {lookupWord && (
+              <p className="text-xs text-ink-muted select-none">
+                Rhymes for <span className="text-terracotta font-semibold">{lookupWord}</span>
+              </p>
+            )}
+            {groups.filter((g) => g.items.length > 0).map((group) => (
+              <section key={group.label} className="space-y-2">
+                <SectionLabel>
+                  {group.label} <span className="text-ink-light font-normal">· {group.items.length}</span>
+                </SectionLabel>
                 <div className="flex flex-wrap gap-1.5">
-                  {data.perfect.map((word) => (
-                    <span
-                      key={word}
-                      onDoubleClick={() => onSearch(word)}
-                      className="px-2.5 py-1 text-xs bg-paper border border-paper-darker text-ink rounded-full font-serif select-all cursor-pointer hover:border-terracotta/40 hover:text-terracotta transition-all"
-                      title="Double click to search"
+                  {group.items.map((item) => (
+                    <Chip
+                      key={item}
+                      interactive={group.searchable}
+                      onDoubleClick={group.searchable ? () => onSearch(item) : undefined}
+                      title={group.searchable ? 'Double-click to find its rhymes' : undefined}
+                      className="select-all"
                     >
-                      {word}
-                    </span>
+                      {item}
+                    </Chip>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* 2. Perfect Phrases */}
-            {data.perfect_bigrams.length > 0 && (
-              <div className="space-y-2">
-                <span className="text-[10px] uppercase tracking-wider font-bold text-ink-light select-none block">
-                  Perfect Phrases
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {data.perfect_bigrams.map((phrase) => (
-                    <span
-                      key={phrase}
-                      className="px-2.5 py-1 text-xs bg-paper border border-paper-darker text-ink rounded-full font-serif select-all"
-                    >
-                      {phrase}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* 3. Slant Rhymes */}
-            {data.slant.length > 0 && (
-              <div className="space-y-2">
-                <span className="text-[10px] uppercase tracking-wider font-bold text-ink-light select-none block">
-                  Slant Rhymes
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {data.slant.map((word) => (
-                    <span
-                      key={word}
-                      onDoubleClick={() => onSearch(word)}
-                      className="px-2.5 py-1 text-xs bg-paper border border-paper-darker text-ink rounded-full font-serif select-all cursor-pointer hover:border-terracotta/40 hover:text-terracotta transition-all"
-                      title="Double click to search"
-                    >
-                      {word}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* 4. Slant Phrases */}
-            {data.slant_bigrams.length > 0 && (
-              <div className="space-y-2">
-                <span className="text-[10px] uppercase tracking-wider font-bold text-ink-light select-none block">
-                  Slant Phrases
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {data.slant_bigrams.map((phrase) => (
-                    <span
-                      key={phrase}
-                      className="px-2.5 py-1 text-xs bg-paper border border-paper-darker text-ink rounded-full font-serif select-all"
-                    >
-                      {phrase}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+              </section>
+            ))}
           </>
         )}
       </div>

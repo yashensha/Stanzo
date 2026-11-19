@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, X, Plus, Filter, Music, Sparkles, BookOpen, Check } from 'lucide-react';
+import { Search, X, Plus, Filter, Music, BookOpen, Check, Loader2 } from 'lucide-react';
+import { Input } from './ui/Input';
+import { EmptyState } from './ui/Panel';
 import { analyzeMalayalamWord, isMalayalam } from '../utils/malayalamProsody';
 import type { WordMeterProfile } from '../utils/malayalamProsody';
 import { transliterateWord, fetchGoogleTransliteration, getTransliterationSync } from '../utils/manglishTransliterate';
@@ -274,97 +276,90 @@ export const MalayalamWordFinderPanel: React.FC<MalayalamWordFinderPanelProps> =
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-transparent text-ink">
       {/* Search Header */}
-      <div className="p-4 border-b border-paper-darker flex flex-col gap-2 select-none flex-shrink-0 bg-paper-dark/20">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <BookOpen className="w-4 h-4 text-terracotta" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-ink">മലയാളം നിഘണ്ടു & മീറ്റർ</span>
-          </div>
+      <div className="p-4 border-b border-paper-darker flex flex-col gap-2 select-none flex-shrink-0">
+        {/* Input bar */}
+        <div className="relative w-full">
+          <Search className="w-3.5 h-3.5 text-ink-light absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Input
+            inputSize="sm"
+            type="text"
+            aria-label="Malayalam word"
+            placeholder="Malayalam or Manglish (mazha, sooryan)"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className={`pl-8 select-text ${activeQuery ? 'pr-14' : ''}`}
+          />
           {activeQuery && (
             <button
+              type="button"
               onClick={() => {
                 setSearchTerm('');
                 if (onClearLookup) onClearLookup();
               }}
-              className="text-[10px] text-ink-muted hover:text-ink px-1.5 py-0.5 rounded border border-paper-darker bg-paper transition cursor-pointer"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-2 text-[11px] text-ink-muted hover:text-ink hover:bg-paper-active rounded-md transition cursor-pointer"
             >
               Clear
             </button>
           )}
         </div>
-
-        {/* Input bar */}
-        <div className="relative w-full">
-          <input
-            type="text"
-            placeholder="Type Malayalam word or Manglish (e.g. mazha, sooryan)..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="w-full bg-paper border border-paper-darker rounded pl-8 pr-3 py-1.5 text-xs text-ink placeholder-ink-light focus:outline-none focus:border-terracotta transition select-text font-serif"
-          />
-          <Search className="w-3.5 h-3.5 text-ink-light absolute left-2.5 top-1/2 -translate-y-1/2" />
-        </div>
-        <span className="text-[10px] text-ink-muted leading-tight">
-          Double-click any word in the lyrics or type above. Supports Manglish typing.
-        </span>
+        <p className="text-xs text-ink-muted leading-snug">
+          Double-click a word in your lyrics, or type above. Manglish works too.
+        </p>
       </div>
 
       {isLoading ? (
-        <div className="flex-1 flex items-center justify-center p-8 text-xs text-ink-muted">
-          Loading 7,145-song lyrical dictionary...
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-xs text-ink-muted" role="status">
+          <Loader2 className="w-5 h-5 animate-spin text-terracotta mb-2" />
+          Loading the 7,145-song dictionary…
         </div>
       ) : !wordProfile ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-ink-muted select-none">
-          <Sparkles className="w-8 h-8 text-terracotta/40 mb-3" />
-          <span className="text-xs font-serif italic mb-1">Type or select a Malayalam word</span>
-          <span className="text-[10px] text-ink-light max-w-[200px]">
-            Find song-verified alternatives matching your required syllables and matras.
-          </span>
-        </div>
+        <EmptyState icon={<BookOpen className="w-5 h-5" />} title="Look up a word" className="flex-1 justify-center">
+          Find song-tested alternatives that match the syllables and matras you need.
+        </EmptyState>
       ) : (
-        <div className="flex-1 overflow-y-auto min-h-0 flex flex-col p-4 gap-4">
+        <div className="flex-1 overflow-y-auto min-h-0 flex flex-col p-4 gap-5">
           {/* Word Meter Profile Card */}
-          <div className="p-3 bg-paper border border-paper-darker rounded-lg shadow-xs flex flex-col gap-2">
-            <div className="flex items-start justify-between">
-              <div>
-                <span className="text-xl font-bold font-serif text-terracotta tracking-wide block">
+          <div className="p-4 bg-paper border border-paper-darker rounded-xl flex flex-col gap-3">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <span className="text-2xl font-semibold text-terracotta block">
                   {wordProfile.word}
                 </span>
-                <span className="text-[11px] text-ink-muted">
+                <span className="text-xs text-ink-muted">
                   {thesaurus[activeQuery]?.meaning || 'Song vocabulary'}
                 </span>
               </div>
               {activeWordFreq && (
-                <div className="flex items-center gap-1 text-[10px] bg-paper-dark px-2 py-0.5 rounded border border-paper-darker text-ink-muted">
-                  <Music className="w-2.5 h-2.5 text-terracotta" />
-                  <span>{activeWordFreq.freq} times in {activeWordFreq.songs} songs</span>
+                <div className="flex items-center gap-1 text-[11px] bg-terracotta-light text-terracotta px-2 py-1 rounded-full flex-shrink-0">
+                  <Music className="w-3 h-3" />
+                  <span>{activeWordFreq.freq}× in {activeWordFreq.songs} songs</span>
                 </div>
               )}
             </div>
 
             {/* Syllables & Matras details */}
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-paper-darker/50 text-[11px]">
-              <div className="flex flex-col bg-paper-dark/30 p-2 rounded border border-paper-darker/30">
-                <span className="text-[9px] uppercase font-bold text-ink-muted">അക്ഷരങ്ങൾ (Syllables)</span>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex flex-col bg-paper-dark p-2.5 rounded-lg">
+                <span className="text-[11px] text-ink-muted">അക്ഷരങ്ങൾ · Syllables</span>
                 <div className="flex items-baseline gap-1 mt-0.5">
-                  <span className="text-base font-bold text-ink">{wordProfile.aksharaCount}</span>
-                  <span className="text-[10px] text-ink-muted">
-                    [{wordProfile.syllables.join(' | ')}]
+                  <span className="text-xl font-semibold text-ink tabular-nums">{wordProfile.aksharaCount}</span>
+                  <span className="text-[11px] text-ink-muted truncate">
+                    {wordProfile.syllables.join(' · ')}
                   </span>
                 </div>
               </div>
 
-              <div className="flex flex-col bg-paper-dark/30 p-2 rounded border border-paper-darker/30">
-                <span className="text-[9px] uppercase font-bold text-ink-muted">മാത്രകൾ (Matra Beats)</span>
+              <div className="flex flex-col bg-paper-dark p-2.5 rounded-lg">
+                <span className="text-[11px] text-ink-muted">മാത്രകൾ · Matras</span>
                 <div className="flex items-baseline gap-1 mt-0.5">
-                  <span className="text-base font-bold text-ink">{wordProfile.totalMatras}</span>
-                  <span className="text-[10px] text-ink-muted">({wordProfile.pattern})</span>
+                  <span className="text-xl font-semibold text-ink tabular-nums">{wordProfile.totalMatras}</span>
+                  <span className="text-[11px] text-ink-muted truncate">{wordProfile.pattern}</span>
                 </div>
               </div>
             </div>
 
             {/* Praasam Keys */}
-            <div className="flex items-center gap-3 text-[10px] text-ink-muted pt-1">
+            <div className="flex items-center gap-3 text-xs text-ink-muted">
               {wordProfile.dviteeyaksharam && (
                 <span>ദ്വിതീയം: <strong className="text-ink">{wordProfile.dviteeyaksharam}</strong></span>
               )}
@@ -375,13 +370,13 @@ export const MalayalamWordFinderPanel: React.FC<MalayalamWordFinderPanelProps> =
           </div>
 
           {/* Filter by Syllable Budget */}
-          <div className="flex flex-col gap-1.5 select-none">
+          <div className="flex flex-col gap-2 select-none" role="group" aria-label="Syllable filter">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase font-bold text-ink-muted tracking-wider flex items-center gap-1">
-                <Filter className="w-3 h-3 text-terracotta" />
-                Target Syllable Budget
+              <span className="text-xs font-semibold text-ink-muted flex items-center gap-1">
+                <Filter className="w-3.5 h-3.5" />
+                Syllables
               </span>
-              <span className="text-[10px] text-ink-light">
+              <span className="text-[11px] text-ink-light">
                 {displaySynonyms.length} words
               </span>
             </div>
@@ -391,10 +386,11 @@ export const MalayalamWordFinderPanel: React.FC<MalayalamWordFinderPanelProps> =
                 <button
                   key={syl}
                   onClick={() => setTargetSyllables(syl)}
-                  className={`px-2 py-0.5 rounded text-[10px] font-medium border transition cursor-pointer ${
+                  aria-pressed={targetSyllables === syl}
+                  className={`h-7 px-2.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
                     targetSyllables === syl
-                      ? 'bg-terracotta text-white border-terracotta shadow-xs'
-                      : 'bg-paper border-paper-darker text-ink-muted hover:text-ink hover:bg-paper-dark'
+                      ? 'bg-terracotta text-white border-terracotta'
+                      : 'bg-paper border-paper-darker text-ink-muted hover:text-ink hover:border-ink-light'
                   }`}
                 >
                   {syl === 'all' ? 'All' : `${syl} Syl`}
@@ -404,24 +400,24 @@ export const MalayalamWordFinderPanel: React.FC<MalayalamWordFinderPanelProps> =
           </div>
 
           {/* Praasam Rhyme Filter */}
-          <div className="flex items-center gap-1 text-[10px] select-none">
-            <span className="text-ink-muted mr-1 font-bold">Rhyme:</span>
+          <div className="flex flex-wrap items-center gap-1 text-xs select-none" role="group" aria-label="Rhyme filter">
+            <span className="text-ink-muted mr-1 font-semibold">Rhyme</span>
             <button
               onClick={() => setTargetPraasam('all')}
-              className={`px-2 py-0.5 rounded border transition cursor-pointer ${
+              className={`h-7 px-2.5 rounded-full border transition-colors cursor-pointer ${
                 targetPraasam === 'all'
-                  ? 'bg-paper-darker text-ink font-semibold border-paper-darker'
-                  : 'bg-paper text-ink-muted border-paper-darker'
+                  ? 'bg-terracotta-light text-terracotta font-semibold border-transparent'
+                  : 'bg-paper text-ink-muted border-paper-darker hover:text-ink'
               }`}
             >
               All
             </button>
             <button
               onClick={() => setTargetPraasam('dviteeyam')}
-              className={`px-2 py-0.5 rounded border transition cursor-pointer ${
+              className={`h-7 px-2.5 rounded-full border transition-colors cursor-pointer ${
                 targetPraasam === 'dviteeyam'
-                  ? 'bg-paper-darker text-ink font-semibold border-paper-darker'
-                  : 'bg-paper text-ink-muted border-paper-darker'
+                  ? 'bg-terracotta-light text-terracotta font-semibold border-transparent'
+                  : 'bg-paper text-ink-muted border-paper-darker hover:text-ink'
               }`}
               title="Second letter rhyme (ദ്വിതീയാക്ഷരപ്രാസം)"
             >
@@ -429,10 +425,10 @@ export const MalayalamWordFinderPanel: React.FC<MalayalamWordFinderPanelProps> =
             </button>
             <button
               onClick={() => setTargetPraasam('anthyam')}
-              className={`px-2 py-0.5 rounded border transition cursor-pointer ${
+              className={`h-7 px-2.5 rounded-full border transition-colors cursor-pointer ${
                 targetPraasam === 'anthyam'
-                  ? 'bg-paper-darker text-ink font-semibold border-paper-darker'
-                  : 'bg-paper text-ink-muted border-paper-darker'
+                  ? 'bg-terracotta-light text-terracotta font-semibold border-transparent'
+                  : 'bg-paper text-ink-muted border-paper-darker hover:text-ink'
               }`}
               title="End rhyme (അന്ത്യപ്രാസം)"
             >
@@ -443,81 +439,91 @@ export const MalayalamWordFinderPanel: React.FC<MalayalamWordFinderPanelProps> =
           {/* Synonyms / Alternative Words List */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-ink">
-                Song-Verified Alternatives
-              </span>
+              <h3 className="text-sm font-semibold text-ink">
+                Song-tested alternatives
+              </h3>
               <button
                 onClick={() => setIsAddingSyn(!isAddingSyn)}
-                className="text-[10px] text-terracotta hover:underline flex items-center gap-0.5 cursor-pointer"
+                className="h-7 px-2 rounded-lg text-xs text-terracotta hover:bg-terracotta-light flex items-center gap-1 cursor-pointer transition-colors"
               >
-                <Plus className="w-3 h-3" />
-                Add Word
+                <Plus className="w-3.5 h-3.5" />
+                Add word
               </button>
             </div>
 
             {/* Quick add custom word input */}
             {isAddingSyn && (
-              <form onSubmit={handleAddCustomSynonym} className="flex items-center gap-1 bg-paper p-1.5 border border-paper-darker rounded">
-                <input
+              <form onSubmit={handleAddCustomSynonym} className="flex items-center gap-1.5">
+                <Input
+                  inputSize="sm"
                   type="text"
-                  placeholder="Add custom word (Manglish/Malayalam)..."
+                  aria-label="Custom word"
+                  placeholder="Manglish or Malayalam"
                   value={newSynonymInput}
                   onChange={(e) => setNewSynonymInput(e.target.value)}
-                  className="flex-1 text-xs bg-transparent focus:outline-none text-ink px-1"
+                  className="flex-1"
                   autoFocus
                 />
                 <button
                   type="submit"
-                  className="px-2 py-0.5 bg-terracotta text-white rounded text-[10px] font-medium cursor-pointer"
+                  className="h-8 px-3 bg-terracotta hover:bg-terracotta-hover text-white rounded-xl text-xs font-medium cursor-pointer transition-colors"
                 >
                   Save
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsAddingSyn(false)}
-                  className="p-0.5 text-ink-muted hover:text-ink cursor-pointer"
+                  aria-label="Cancel"
+                  className="w-8 h-8 flex items-center justify-center text-ink-muted hover:text-ink hover:bg-paper-active rounded-lg cursor-pointer"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4" />
                 </button>
               </form>
             )}
 
             {displaySynonyms.length === 0 ? (
-              <div className="p-4 bg-paper/50 border border-dashed border-paper-darker rounded text-center text-[11px] text-ink-muted">
-                No matching alternatives for {targetSyllables === 'all' ? 'this word' : `${targetSyllables} syllables`}.
-                <br />
-                <span className="text-[10px] text-ink-light">Click &quot;Add Word&quot; above to link your own!</span>
+              <div className="p-4 border border-dashed border-paper-darker rounded-xl text-center text-xs text-ink-muted">
+                No alternatives for {targetSyllables === 'all' ? 'this word' : `${targetSyllables} syllables`} yet.
+                <span className="block mt-1 text-ink-light">Use "Add word" to link your own.</span>
               </div>
             ) : (
               <div className="flex flex-col gap-1.5">
                 {displaySynonyms.map((syn) => (
                   <div
                     key={syn.w}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => handleWordClick(syn.w)}
-                    className="p-2 bg-paper border border-paper-darker rounded hover:border-terracotta transition cursor-pointer flex items-center justify-between group shadow-2xs"
+                    onKeyDown={(e) => {
+                      if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                        e.preventDefault();
+                        handleWordClick(syn.w);
+                      }
+                    }}
+                    className="px-3 py-2 bg-paper border border-paper-darker rounded-xl hover:border-terracotta transition-colors cursor-pointer flex items-center justify-between group focus-visible:outline-2 focus-visible:outline-terracotta"
                   >
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-serif font-semibold text-sm text-ink group-hover:text-terracotta">
+                    <div className="flex items-baseline gap-2 min-w-0">
+                      <span className="font-semibold text-base text-ink group-hover:text-terracotta transition-colors">
                         {syn.w}
                       </span>
-                      <span className="text-[10px] text-ink-muted">
-                        {syn.a} syl, {syn.m} matras
+                      <span className="text-[11px] text-ink-muted whitespace-nowrap">
+                        {syn.a} syl · {syn.m} matras
                       </span>
                       {syn.f > 1 && (
-                        <span className="text-[9px] text-ink-light">
-                          (in {syn.f} songs)
+                        <span className="text-[11px] text-ink-light whitespace-nowrap">
+                          {syn.f} songs
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1 flex-shrink-0">
                       {copiedWord === syn.w ? (
-                        <span className="text-[9px] text-emerald-600 flex items-center gap-0.5 font-bold">
+                        <span className="text-[11px] text-terracotta flex items-center gap-0.5 font-semibold" role="status">
                           <Check className="w-3 h-3" /> Copied
                         </span>
                       ) : (
-                        <span className="text-[9px] text-ink-light opacity-0 group-hover:opacity-100 transition">
-                          Click to use
+                        <span className="text-[11px] text-ink-light opacity-0 group-hover:opacity-100 transition-opacity">
+                          Use
                         </span>
                       )}
 
@@ -528,7 +534,8 @@ export const MalayalamWordFinderPanel: React.FC<MalayalamWordFinderPanelProps> =
                           handleRemoveSynonym(syn.w);
                         }}
                         title="Remove from this cluster"
-                        className="text-ink-light hover:text-red-500 p-0.5 rounded opacity-0 group-hover:opacity-100 transition cursor-pointer"
+                        aria-label={`Remove ${syn.w}`}
+                        className="w-6 h-6 flex items-center justify-center text-ink-light hover:text-red-600 dark:hover:text-red-400 rounded-md opacity-100 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 focus-visible:opacity-100 transition cursor-pointer"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -541,14 +548,14 @@ export const MalayalamWordFinderPanel: React.FC<MalayalamWordFinderPanelProps> =
 
           {/* Additional Praasam (Rhyme) Suggestions from Song Corpus */}
           {(praasamMatches.anthyam.length > 0 || praasamMatches.dviteeyam.length > 0) && (
-            <div className="flex flex-col gap-2 pt-3 border-t border-paper-darker">
-              <span className="text-xs font-semibold text-ink">
-                Corpus Rhymes (പ്രാസം)
-              </span>
+            <div className="flex flex-col gap-3 pt-4 border-t border-paper-darker">
+              <h3 className="text-sm font-semibold text-ink">
+                Rhymes from songs · പ്രാസം
+              </h3>
 
               {praasamMatches.dviteeyam.length > 0 && (
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-ink-muted uppercase">
+                  <span className="text-xs font-semibold text-ink-muted">
                     ദ്വിതീയാക്ഷരപ്രാസം ({wordProfile.dviteeyaksharam})
                   </span>
                   <div className="flex flex-wrap gap-1">
@@ -556,9 +563,9 @@ export const MalayalamWordFinderPanel: React.FC<MalayalamWordFinderPanelProps> =
                       <button
                         key={item.w}
                         onClick={() => handleWordClick(item.w)}
-                        className="px-2 py-0.5 bg-paper border border-paper-darker rounded text-xs font-serif text-ink hover:border-terracotta transition cursor-pointer"
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-paper border border-paper-darker rounded-full text-sm text-ink hover:border-terracotta hover:text-terracotta transition-colors cursor-pointer"
                       >
-                        {item.w} <span className="text-[9px] text-ink-muted">({item.a}s)</span>
+                        {item.w} <span className="text-[11px] text-ink-muted">{item.a}s</span>
                       </button>
                     ))}
                   </div>
@@ -567,7 +574,7 @@ export const MalayalamWordFinderPanel: React.FC<MalayalamWordFinderPanelProps> =
 
               {praasamMatches.anthyam.length > 0 && (
                 <div className="flex flex-col gap-1 pt-1">
-                  <span className="text-[10px] font-bold text-ink-muted uppercase">
+                  <span className="text-xs font-semibold text-ink-muted">
                     അന്ത്യപ്രാസം ({wordProfile.rhymeEnding})
                   </span>
                   <div className="flex flex-wrap gap-1">
@@ -575,9 +582,9 @@ export const MalayalamWordFinderPanel: React.FC<MalayalamWordFinderPanelProps> =
                       <button
                         key={item.w}
                         onClick={() => handleWordClick(item.w)}
-                        className="px-2 py-0.5 bg-paper border border-paper-darker rounded text-xs font-serif text-ink hover:border-terracotta transition cursor-pointer"
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-paper border border-paper-darker rounded-full text-sm text-ink hover:border-terracotta hover:text-terracotta transition-colors cursor-pointer"
                       >
-                        {item.w} <span className="text-[9px] text-ink-muted">({item.a}s)</span>
+                        {item.w} <span className="text-[11px] text-ink-muted">{item.a}s</span>
                       </button>
                     ))}
                   </div>

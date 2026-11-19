@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import RecordRTC from 'recordrtc';
 import { api } from '../utils/apiClient';
 import { VoiceMemoCard } from './VoiceMemoCard';
+import { EmptyState } from './ui/Panel';
 import { Loader2, Mic, Square, AlertCircle } from 'lucide-react';
 
 interface VoiceMemo {
@@ -177,10 +178,10 @@ export const VoiceMemosPanel: React.FC<VoiceMemosPanelProps> = ({ projectId }) =
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-transparent text-ink relative select-none">
       {/* Recording Control Card */}
-      <div className="p-4 border-b border-paper-darker flex flex-col items-center gap-3 bg-paper-dark/20 flex-shrink-0">
+      <div className="px-4 py-6 border-b border-paper-darker flex flex-col items-center gap-3 flex-shrink-0">
         {micPermission === 'denied' && (
-          <div className="w-full flex items-start gap-2 bg-amber-light border border-[#F5DDA8] text-ink p-2.5 rounded text-xs leading-normal mb-1">
-            <AlertCircle className="w-4 h-4 text-amber-DEFAULT flex-shrink-0 mt-0.5" />
+          <div role="alert" className="w-full flex items-start gap-2 bg-amber-50 border border-amber-200 text-amber-900 dark:bg-amber-950/40 dark:border-amber-900/60 dark:text-amber-200 p-3 rounded-xl text-xs leading-normal mb-1">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <span>Microphone permission denied. Please enable mic access in your browser settings to record.</span>
           </div>
         )}
@@ -188,10 +189,10 @@ export const VoiceMemosPanel: React.FC<VoiceMemosPanelProps> = ({ projectId }) =
         <div className="relative flex flex-col items-center">
           <button
             onClick={isRecording ? handleStopRecording : handleStartRecording}
-            className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-md border ${
+            className={`w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 border-4 active:scale-95 ${
               isRecording
-                ? 'bg-terracotta border-terracotta text-white animate-pulse'
-                : 'bg-paper hover:bg-paper-darker text-terracotta border-paper-darker hover:border-paper-darkest'
+                ? 'bg-red-600 border-red-600/25 text-white'
+                : 'bg-terracotta border-terracotta-light text-paper hover:bg-terracotta-hover'
             } cursor-pointer`}
             title={isRecording ? 'Stop Recording' : 'Start Recording'}
             aria-label={isRecording ? 'Stop Recording' : 'Start Recording'}
@@ -205,29 +206,29 @@ export const VoiceMemosPanel: React.FC<VoiceMemosPanelProps> = ({ projectId }) =
 
           {isRecording && (
             <span className="absolute -bottom-1 flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-terracotta opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-terracotta"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
             </span>
           )}
         </div>
 
-        <span className="text-xs font-semibold text-ink-muted">
-          {isRecording ? 'Recording (Click to stop)' : 'Record Voice Memo'}
+        <span className="text-xs font-medium text-ink-muted" aria-live="polite">
+          {isRecording ? 'Recording… tap to stop' : 'Tap to record a memo'}
         </span>
       </div>
 
       {/* Scrollable list of voice memos */}
       {loading ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-ink-light py-8">
+        <div className="flex-1 flex flex-col items-center justify-center text-ink-muted py-8" role="status">
           <Loader2 className="w-5 h-5 animate-spin text-terracotta mb-2" />
-          <span className="font-serif italic text-xs">Loading Voice Memos...</span>
+          <span className="text-xs">Loading voice memos…</span>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 gap-3 paper-lines">
+        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 gap-2.5">
           {memos.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center py-12 text-center text-ink-light px-4">
-              <span className="font-serif italic text-xs">No voice memos recorded yet.</span>
-            </div>
+            <EmptyState icon={<Mic className="w-5 h-5" />} title="No memos yet">
+              Hum the melody or talk through an idea. Memos stay with this song.
+            </EmptyState>
           ) : (
             memos.map((memo) => (
               <VoiceMemoCard
